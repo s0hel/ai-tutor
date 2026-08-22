@@ -8,6 +8,8 @@ export const FRACTION_SKILLS: Skill[] = [
     title: "Finding equivalent fractions",
     order: 1,
     generatorId: "fraction-equivalent",
+    videoId: "N1X0vf5PUz4",
+    videoTitle: "Intro to equivalent fractions | Khan Academy",
     conceptBrief: {
       summary:
         "Equivalent fractions represent the same amount written differently. If you multiply (or divide) both the numerator and denominator by the same number, the value doesn't change.",
@@ -25,6 +27,8 @@ export const FRACTION_SKILLS: Skill[] = [
     title: "Comparing fractions",
     order: 2,
     generatorId: "fraction-compare",
+    videoId: "zRjLZROI7wc",
+    videoTitle: "Intro to comparing fractions with different denominators | Khan Academy",
     conceptBrief: {
       summary:
         "To compare fractions with different denominators, rewrite both with a common denominator first, then just compare the numerators.",
@@ -54,6 +58,8 @@ export const FRACTION_SKILLS: Skill[] = [
     title: "Adding fractions with different denominators",
     order: 4,
     generatorId: "fraction-add-unlike",
+    videoId: "bcCLKACsYJ0",
+    videoTitle: "Adding fractions with unlike denominators | Khan Academy",
     conceptBrief: {
       summary:
         "First find a common denominator, rewrite both fractions using it, then add the numerators like before.",
@@ -70,6 +76,8 @@ export const FRACTION_SKILLS: Skill[] = [
     title: "Simplifying fractions to lowest terms",
     order: 5,
     generatorId: "fraction-simplify",
+    videoId: "WPimvspI0_c",
+    videoTitle: "Fractions in lowest terms | Khan Academy",
     conceptBrief: {
       summary:
         "A fraction is in lowest terms when the numerator and denominator share no common factor besides 1. Find the largest number that divides evenly into both, then divide both by it.",

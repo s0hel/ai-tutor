@@ -14,4 +14,8 @@ export interface Skill {
   order: number;
   conceptBrief: ConceptBrief;
   generatorId: string;
+  /** YouTube video ID for an optional Khan Academy intro video shown during the teach phase. */
+  videoId?: string;
+  /** Title of the linked video, for attribution/accessibility. */
+  videoTitle?: string;
 }

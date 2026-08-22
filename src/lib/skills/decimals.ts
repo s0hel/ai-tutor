@@ -8,6 +8,8 @@ export const DECIMAL_SKILLS: Skill[] = [
     title: "Decimal place value",
     order: 1,
     generatorId: "decimal-place-value",
+    videoId: "x-Dqe5U1TXA",
+    videoTitle: "Decimal place value | Khan Academy",
     conceptBrief: {
       summary:
         "After the decimal point, the places are tenths, hundredths, then thousandths — each one ten times smaller than the last, just like whole-number place value but going the other direction.",
@@ -22,6 +24,8 @@ export const DECIMAL_SKILLS: Skill[] = [
     title: "Comparing decimals",
     order: 2,
     generatorId: "decimal-compare",
+    videoId: "gAV9kwvoD6s",
+    videoTitle: "Comparing decimals | Khan Academy",
     conceptBrief: {
       summary:
         "Line up the decimal points and compare digit by digit from the left — whole number part first, then tenths, then hundredths — until you find a difference.",
@@ -38,6 +42,8 @@ export const DECIMAL_SKILLS: Skill[] = [
     title: "Adding and subtracting decimals",
     order: 3,
     generatorId: "decimal-add-subtract",
+    videoId: "oLh_sIESQnY",
+    videoTitle: "Adding decimals | Khan Academy",
     conceptBrief: {
       summary: "Line up the decimal points in a column, then add or subtract just like whole numbers.",
       workedExamples: ["3.25 + 1.40 = 4.65."],
@@ -51,6 +57,8 @@ export const DECIMAL_SKILLS: Skill[] = [
     title: "Converting fractions to decimals",
     order: 4,
     generatorId: "decimal-fraction-convert",
+    videoId: "Gn2pdkvdbGQ",
+    videoTitle: "Converting fractions to decimals | Khan Academy",
     conceptBrief: {
       summary: "A fraction with a denominator of 10 or 100 converts directly: the numerator becomes the decimal digits.",
       workedExamples: ["7/10 = 0.7.", "23/100 = 0.23."],

@@ -10,6 +10,7 @@ import MicButton from "@/components/MicButton";
 import LevelBar from "@/components/LevelBar";
 import BadgeToast from "@/components/BadgeToast";
 import Confetti from "@/components/Confetti";
+import KhanVideo from "@/components/KhanVideo";
 import { useSpeech } from "@/hooks/useSpeech";
 import type { ChatMessage, Profile, Subject, TutorTurn } from "@/lib/types";
 
@@ -54,6 +55,7 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [skillTitle, setSkillTitle] = useState<string | null>(null);
+  const [skillVideo, setSkillVideo] = useState<{ videoId: string; title: string } | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
@@ -86,10 +88,15 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
     if (subject !== "math" || !skillSlug) return;
     fetch("/api/skills")
       .then((r) => r.json())
-      .then((data: { strands: { skills: { slug: string; title: string }[] }[] }) => {
-        const found = data.strands.flatMap((s) => s.skills).find((s) => s.slug === skillSlug);
-        setSkillTitle(found?.title ?? null);
-      });
+      .then(
+        (data: {
+          strands: { skills: { slug: string; title: string; videoId?: string; videoTitle?: string }[] }[];
+        }) => {
+          const found = data.strands.flatMap((s) => s.skills).find((s) => s.slug === skillSlug);
+          setSkillTitle(found?.title ?? null);
+          setSkillVideo(found?.videoId ? { videoId: found.videoId, title: found.videoTitle ?? found.title } : null);
+        }
+      );
   }, [subject, skillSlug]);
 
   const sendTurn = async (history: ChatMessage[], opts?: { startPractice?: boolean }) => {
@@ -221,6 +228,10 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
         </button>
         </div>
       </header>
+
+      {subject === "math" && phase === "teach" && skillVideo && (
+        <KhanVideo videoId={skillVideo.videoId} title={skillVideo.title} />
+      )}
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-6">
         {messages.map((m, i) => (
