@@ -22,12 +22,12 @@ export interface BadgeEvent {
   label: string;
 }
 
-export function evaluateBadges(
+export async function evaluateBadges(
   profileId: number,
   subject: Subject,
   state: SkillState,
   leveledUp: boolean
-): BadgeEvent[] {
+): Promise<BadgeEvent[]> {
   const earned: BadgeEvent[] = [];
   const badgeDefs: Record<string, string> = {
     first_steps: "First Steps",
@@ -40,24 +40,24 @@ export function evaluateBadges(
     daily_streak_7: "Weekly Champ",
   };
 
-  const tryAward = (key: string) => {
-    if (awardBadge(profileId, key)) earned.push({ key, label: badgeDefs[key] });
+  const tryAward = async (key: string) => {
+    if (await awardBadge(profileId, key)) earned.push({ key, label: badgeDefs[key] });
   };
 
-  tryAward("first_steps");
-  if (state.streak >= 5) tryAward("streak_5");
-  if (state.streak >= 10) tryAward("streak_10");
-  if (leveledUp) tryAward("level_up");
+  await tryAward("first_steps");
+  if (state.streak >= 5) await tryAward("streak_5");
+  if (state.streak >= 10) await tryAward("streak_10");
+  if (leveledUp) await tryAward("level_up");
 
-  const topics = distinctTopics(profileId, subject);
+  const topics = await distinctTopics(profileId, subject);
   if (topics.length >= 5) {
-    tryAward(subject === "math" ? "math_explorer" : "reading_explorer");
+    await tryAward(subject === "math" ? "math_explorer" : "reading_explorer");
   }
 
-  recordPracticeDay(profileId);
-  const dailyStreak = currentDailyStreak(profileId);
-  if (dailyStreak >= 3) tryAward("daily_streak_3");
-  if (dailyStreak >= 7) tryAward("daily_streak_7");
+  await recordPracticeDay(profileId);
+  const dailyStreak = await currentDailyStreak(profileId);
+  if (dailyStreak >= 3) await tryAward("daily_streak_3");
+  if (dailyStreak >= 7) await tryAward("daily_streak_7");
 
   return earned;
 }

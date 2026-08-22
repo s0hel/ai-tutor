@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   const skillSlug = body.skillSlug as string | undefined;
   const startPractice = !!body.startPractice;
 
-  const profile = getProfileForFamily(profileId, session.user.familyId);
+  const profile = await getProfileForFamily(profileId, session.user.familyId);
   if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
   if (subject !== "math" && subject !== "reading") {
     return NextResponse.json({ error: "Invalid subject" }, { status: 400 });
@@ -51,8 +51,8 @@ export async function POST(req: NextRequest) {
 
   if (subject === "reading") {
     const topic = priorTurnMessage?.turn?.topic ?? "getting-started";
-    const state = getSkillState(profileId, "reading", topic);
-    const recent = recentAttempts(profileId, "reading", 8);
+    const state = await getSkillState(profileId, "reading", topic);
+    const recent = await recentAttempts(profileId, "reading", 8);
 
     let turn: TutorTurn;
     try {
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     const badgesEarned: { key: string; label: string }[] = [];
 
     if (isKidAnswering && priorTurnMessage?.turn) {
-      logAttempt({
+      await logAttempt({
         profileId,
         subject: "reading",
         topic,
@@ -77,12 +77,12 @@ export async function POST(req: NextRequest) {
 
       const updated = nextSkillState(state, turn.isCorrectAnswer);
       const leveledUp = Math.floor(updated.level) > Math.floor(state.level);
-      upsertSkillState(updated);
-      badgesEarned.push(...evaluateBadges(profileId, "reading", updated, leveledUp));
+      await upsertSkillState(updated);
+      badgesEarned.push(...(await evaluateBadges(profileId, "reading", updated, leveledUp)));
     }
 
     if (turn.topic !== topic) {
-      upsertSkillState(getSkillState(profileId, "reading", turn.topic));
+      await upsertSkillState(await getSkillState(profileId, "reading", turn.topic));
     }
 
     return NextResponse.json({ turns: [turn], phase: "freeform", badgesEarned });
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
   const skill = getSkill(skillSlug);
   if (!skill) return NextResponse.json({ error: "Unknown skill" }, { status: 404 });
 
-  let state = getSkillState(profileId, "math", skill.slug);
+  let state = await getSkillState(profileId, "math", skill.slug);
   let phase: "teach" | "practice" = state.teachCompletedAt ? "practice" : "teach";
 
   try {
@@ -108,19 +108,19 @@ export async function POST(req: NextRequest) {
         teachCompletedAt: new Date().toISOString(),
         status: state.status === "not_started" ? "practicing" : state.status,
       };
-      upsertSkillState(state);
+      await upsertSkillState(state);
       phase = "practice";
     }
 
     // phase === "practice" from here on
-    const pending = getPendingProblem(profileId, "math", skill.slug);
+    const pending = await getPendingProblem(profileId, "math", skill.slug);
     const badgesEarned: { key: string; label: string }[] = [];
 
     if (pending && lastMessage?.role === "kid") {
       const attemptCount = pending.attemptCount + 1;
       const grade = gradeAnswer(lastMessage.text, pending.correctAnswer);
 
-      logAttempt({
+      await logAttempt({
         profileId,
         subject: "math",
         topic: skill.slug,
@@ -128,26 +128,26 @@ export async function POST(req: NextRequest) {
         kidResponse: lastMessage.text,
         correct: grade.correct ? 1 : 0,
       });
-      recordSkillPracticeDay(profileId, "math", skill.slug);
+      await recordSkillPracticeDay(profileId, "math", skill.slug);
 
       const previousState = state;
       const updated = nextSkillState(state, grade.correct);
-      const masteryPatch = evaluateMastery(profileId, skill, updated);
+      const masteryPatch = await evaluateMastery(profileId, skill, updated);
       const finalState = {
         ...updated,
         status: masteryPatch.status,
         masteredAt: masteryPatch.masteredAt,
         lastReviewedAt: new Date().toISOString(),
       };
-      upsertSkillState(finalState);
+      await upsertSkillState(finalState);
       const leveledUp = Math.floor(finalState.level) > Math.floor(previousState.level);
-      badgesEarned.push(...evaluateBadges(profileId, "math", finalState, leveledUp));
+      badgesEarned.push(...(await evaluateBadges(profileId, "math", finalState, leveledUp)));
 
       const isFinalReveal = !grade.correct && attemptCount >= 3;
       const hint = !grade.correct && !isFinalReveal ? pending.hintLadder[attemptCount - 1] : null;
       const explanation = grade.correct || isFinalReveal ? pending.explanation : null;
 
-      if (!grade.correct) incrementPendingAttempt(profileId, "math", skill.slug);
+      if (!grade.correct) await incrementPendingAttempt(profileId, "math", skill.slug);
 
       const feedback = await presentFeedback({
         profile,
@@ -172,9 +172,9 @@ export async function POST(req: NextRequest) {
       const turns: TutorTurn[] = [feedbackTurn];
 
       if (grade.correct || isFinalReveal) {
-        clearPendingProblem(profileId, "math", skill.slug);
+        await clearPendingProblem(profileId, "math", skill.slug);
         const nextProblem = getGenerator(skill.generatorId).generate(finalState.level);
-        savePendingProblem(profileId, "math", skill.slug, nextProblem);
+        await savePendingProblem(profileId, "math", skill.slug, nextProblem);
         const presented = await presentProblem({ profile, skill, problem: nextProblem });
         turns.push({
           spokenText: presented.spokenText,
@@ -197,7 +197,7 @@ export async function POST(req: NextRequest) {
 
     // No pending problem yet, or reloading without a new kid answer: (re-)present a problem
     const problem = pending ?? getGenerator(skill.generatorId).generate(state.level);
-    if (!pending) savePendingProblem(profileId, "math", skill.slug, problem);
+    if (!pending) await savePendingProblem(profileId, "math", skill.slug, problem);
     const presented = await presentProblem({ profile, skill, problem });
     const turn: TutorTurn = {
       spokenText: presented.spokenText,

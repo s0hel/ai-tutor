@@ -9,17 +9,17 @@ const MASTERY = {
   minDistinctDays: 2,
 };
 
-export function evaluateMastery(
+export async function evaluateMastery(
   profileId: number,
   skill: Skill,
   state: SkillState
-): { status: SkillStatus; masteredAt: string | null } {
+): Promise<{ status: SkillStatus; masteredAt: string | null }> {
   if (state.status === "mastered") {
     return { status: "mastered", masteredAt: state.masteredAt };
   }
 
-  const stats = attemptStatsForTopic(profileId, skill.subject, skill.slug, MASTERY.minAttempts);
-  const days = skillPracticeDayCount(profileId, skill.subject, skill.slug);
+  const stats = await attemptStatsForTopic(profileId, skill.subject, skill.slug, MASTERY.minAttempts);
+  const days = await skillPracticeDayCount(profileId, skill.subject, skill.slug);
   const accuracy = stats.total > 0 ? stats.correct / stats.total : 0;
 
   const justMastered =

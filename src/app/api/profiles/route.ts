@@ -6,7 +6,7 @@ import { AVATARS } from "@/lib/types";
 export async function GET() {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Sign-in required" }, { status: 401 });
-  return NextResponse.json({ profiles: listProfiles(session.user.familyId) });
+  return NextResponse.json({ profiles: await listProfiles(session.user.familyId) });
 }
 
 export async function POST(req: NextRequest) {
@@ -23,6 +23,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Age must be between 4 and 14" }, { status: 400 });
   }
 
-  const profile = createProfile(session.user.familyId, name, age, avatarKey);
+  const profile = await createProfile(session.user.familyId, name, age, avatarKey);
   return NextResponse.json({ profile }, { status: 201 });
 }

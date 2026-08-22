@@ -15,13 +15,13 @@ export async function GET(req: NextRequest) {
   if (!session?.user) return NextResponse.json({ error: "Sign-in required" }, { status: 401 });
 
   const profileId = Number(req.nextUrl.searchParams.get("profileId"));
-  const profile = getProfileForFamily(profileId, session.user.familyId);
+  const profile = await getProfileForFamily(profileId, session.user.familyId);
   if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
 
-  const attempts = allAttempts(profileId);
-  const skillStates = listSkillStates(profileId);
-  const badges = listBadges(profileId);
-  const dailyStreak = currentDailyStreak(profileId);
+  const attempts = await allAttempts(profileId);
+  const skillStates = await listSkillStates(profileId);
+  const badges = await listBadges(profileId);
+  const dailyStreak = await currentDailyStreak(profileId);
 
   const bySubject = (subject: "math" | "reading") => {
     const subjectAttempts = attempts.filter((a) => a.subject === subject && a.correct !== null);
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     profile,
     dailyStreak,
     badges,
-    math: { ...bySubject("math"), board: getSkillBoard(profileId) },
+    math: { ...bySubject("math"), board: await getSkillBoard(profileId) },
     reading: bySubject("reading"),
     recentAttempts: attempts.slice(0, 30),
     strandMeta: STRAND_META,

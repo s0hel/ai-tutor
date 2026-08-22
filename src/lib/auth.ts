@@ -19,16 +19,16 @@ export const {
     async signIn({ user, account }) {
       if (!account || account.provider !== "google" || !user.email) return false;
       const googleSub = account.providerAccountId;
-      if (!getParentByGoogleSub(googleSub)) {
-        const invite = consumeInviteForEmail(user.email);
-        const familyId = invite ? invite.familyId : createFamily().id;
-        createParent(familyId, googleSub, user.email, user.name ?? null);
+      if (!(await getParentByGoogleSub(googleSub))) {
+        const invite = await consumeInviteForEmail(user.email);
+        const familyId = invite ? invite.familyId : (await createFamily()).id;
+        await createParent(familyId, googleSub, user.email, user.name ?? null);
       }
       return true;
     },
     async jwt({ token, account }) {
       if (account?.provider === "google") {
-        const parent = getParentByGoogleSub(account.providerAccountId);
+        const parent = await getParentByGoogleSub(account.providerAccountId);
         if (parent) {
           token.familyId = parent.familyId;
           token.parentId = parent.id;

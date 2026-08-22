@@ -7,6 +7,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (!session?.user) return NextResponse.json({ error: "Sign-in required" }, { status: 401 });
 
   const { id } = await params;
-  deleteProfile(Number(id), session.user.familyId);
+  await deleteProfile(Number(id), session.user.familyId);
   return NextResponse.json({ ok: true });
 }

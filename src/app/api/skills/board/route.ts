@@ -9,8 +9,8 @@ export async function GET(req: NextRequest) {
   if (!session?.user) return NextResponse.json({ error: "Sign-in required" }, { status: 401 });
 
   const profileId = Number(req.nextUrl.searchParams.get("profileId"));
-  const profile = getProfileForFamily(profileId, session.user.familyId);
+  const profile = await getProfileForFamily(profileId, session.user.familyId);
   if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
 
-  return NextResponse.json({ board: getSkillBoard(profileId), strandMeta: STRAND_META });
+  return NextResponse.json({ board: await getSkillBoard(profileId), strandMeta: STRAND_META });
 }

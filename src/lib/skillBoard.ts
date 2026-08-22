@@ -9,8 +9,8 @@ export interface SkillBoardEntry {
   recommended: boolean;
 }
 
-export function getSkillBoard(profileId: number): SkillBoardEntry[] {
-  const states = listSkillStates(profileId, "math");
+export async function getSkillBoard(profileId: number): Promise<SkillBoardEntry[]> {
+  const states = await listSkillStates(profileId, "math");
   const stateByTopic = new Map(states.map((s) => [s.topic, s]));
 
   const entries: SkillBoardEntry[] = SKILLS.map((skill) => {
