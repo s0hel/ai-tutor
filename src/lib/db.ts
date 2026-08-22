@@ -61,6 +61,31 @@ function createDb() {
       sessionSecret TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS families (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS parents (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      familyId INTEGER NOT NULL,
+      googleSub TEXT NOT NULL UNIQUE,
+      email TEXT NOT NULL,
+      name TEXT,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (familyId) REFERENCES families(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS parent_invites (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      familyId INTEGER NOT NULL,
+      email TEXT NOT NULL,
+      invitedByParentId INTEGER NOT NULL,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (familyId) REFERENCES families(id) ON DELETE CASCADE,
+      FOREIGN KEY (invitedByParentId) REFERENCES parents(id) ON DELETE CASCADE
+    );
+
     CREATE TABLE IF NOT EXISTS practice_days (
       profileId INTEGER NOT NULL,
       day TEXT NOT NULL,
@@ -101,6 +126,7 @@ function createDb() {
   ensureColumn("skill_state", "masteredAt", `masteredAt TEXT`);
   ensureColumn("skill_state", "lastReviewedAt", `lastReviewedAt TEXT`);
   ensureColumn("skill_state", "teachCompletedAt", `teachCompletedAt TEXT`);
+  ensureColumn("profiles", "familyId", `familyId INTEGER REFERENCES families(id)`);
 
   return db;
 }

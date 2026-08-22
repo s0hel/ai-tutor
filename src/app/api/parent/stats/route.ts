@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SESSION_COOKIE, verifySessionToken } from "@/lib/parentAuth";
+import { auth } from "@/lib/auth";
 import {
   allAttempts,
   currentDailyStreak,
-  getProfile,
+  getProfileForFamily,
   listBadges,
   listSkillStates,
 } from "@/lib/repo";
@@ -11,12 +11,11 @@ import { getSkillBoard } from "@/lib/skillBoard";
 import { STRAND_META } from "@/lib/skills";
 
 export async function GET(req: NextRequest) {
-  if (!verifySessionToken(req.cookies.get(SESSION_COOKIE)?.value)) {
-    return NextResponse.json({ error: "Parent authentication required" }, { status: 401 });
-  }
+  const session = await auth();
+  if (!session?.user) return NextResponse.json({ error: "Sign-in required" }, { status: 401 });
 
   const profileId = Number(req.nextUrl.searchParams.get("profileId"));
-  const profile = getProfile(profileId);
+  const profile = getProfileForFamily(profileId, session.user.familyId);
   if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
 
   const attempts = allAttempts(profileId);

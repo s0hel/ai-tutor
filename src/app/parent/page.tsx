@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import AvatarIcon from "@/components/AvatarIcon";
-import Mascot from "@/components/Mascot";
-import { AVATARS, BADGES, type Attempt, type Badge, type Profile, type SkillState } from "@/lib/types";
+import { AVATARS, BADGES, type Attempt, type Badge, type ParentInvite, type Profile, type SkillState } from "@/lib/types";
 import type { SkillBoardEntry } from "@/components/SkillBoard";
 import type { Strand } from "@/lib/skills";
 
@@ -24,95 +23,71 @@ interface StatsResponse {
   strandMeta: Record<Strand, { label: string; emoji: string; order: number }>;
 }
 
-function PinGate({ onSuccess }: { onSuccess: () => void }) {
-  const [configured, setConfigured] = useState<boolean | null>(null);
-  const [pin, setPin] = useState("");
-  const [confirmPin, setConfirmPin] = useState("");
+function InviteCoParent() {
+  const [email, setEmail] = useState("");
+  const [invites, setInvites] = useState<ParentInvite[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/parent/auth")
+  const refresh = useCallback(() => {
+    fetch("/api/parent/invites")
       .then((r) => r.json())
-      .then((data) => {
-        if (data.authed) onSuccess();
-        else setConfigured(data.configured);
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      .then((data: { invites: ParentInvite[] }) => setInvites(data.invites ?? []));
   }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   const submit = async () => {
     setError(null);
-    if (!configured && pin !== confirmPin) {
-      setError("PINs don't match");
-      return;
-    }
     setSubmitting(true);
-    const res = await fetch("/api/parent/auth", {
+    const res = await fetch("/api/parent/invites", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pin }),
+      body: JSON.stringify({ email }),
     });
     setSubmitting(false);
     if (res.ok) {
-      onSuccess();
+      setEmail("");
+      refresh();
     } else {
       const data = await res.json().catch(() => ({}));
       setError(data.error ?? "Something went wrong");
     }
   };
 
-  if (configured === null) {
-    return (
-      <main className="flex flex-1 items-center justify-center">
-        <Mascot mood="thinking" />
-      </main>
-    );
-  }
-
   return (
-    <main className="mx-auto flex w-full max-w-sm flex-1 flex-col items-center justify-center px-6 py-10 text-center">
-      <Mascot mood="idle" />
-      <h1 className="mt-4 font-display text-2xl font-semibold text-kip-ink">
-        {configured ? "Enter Parent PIN" : "Create a Parent PIN"}
-      </h1>
+    <div className="rounded-2xl bg-white p-5 shadow-sm">
+      <h3 className="font-display text-lg font-semibold text-kip-ink">Invite a co-parent</h3>
       <p className="mt-1 text-sm text-kip-ink/60">
-        {configured
-          ? "This keeps settings and progress private from the kids."
-          : "Pick a 4-8 digit PIN. You'll use this to manage profiles and view progress."}
+        They&apos;ll get access to these profiles once they sign in with Google using this email.
       </p>
-      <input
-        type="password"
-        inputMode="numeric"
-        value={pin}
-        onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-        onKeyDown={(e) => e.key === "Enter" && submit()}
-        placeholder="PIN"
-        className="mt-6 w-40 rounded-2xl border-2 border-kip-purple/20 px-4 py-3 text-center text-2xl tracking-[0.3em] outline-none focus:border-kip-purple"
-      />
-      {!configured && (
+      <div className="mt-3 flex flex-wrap items-center gap-3">
         <input
-          type="password"
-          inputMode="numeric"
-          value={confirmPin}
-          onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
-          onKeyDown={(e) => e.key === "Enter" && submit()}
-          placeholder="Confirm PIN"
-          className="mt-3 w-40 rounded-2xl border-2 border-kip-purple/20 px-4 py-3 text-center text-2xl tracking-[0.3em] outline-none focus:border-kip-purple"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="co-parent@example.com"
+          className="rounded-xl border-2 border-kip-purple/15 px-3 py-2 outline-none focus:border-kip-purple"
         />
+        <button
+          onClick={submit}
+          disabled={submitting || !email.trim()}
+          className="rounded-full bg-kip-teal px-5 py-2 font-semibold text-white disabled:opacity-40"
+        >
+          Invite
+        </button>
+      </div>
+      {error && <p className="mt-2 text-sm text-kip-red">{error}</p>}
+      {invites.length > 0 && (
+        <ul className="mt-3 space-y-1 text-sm text-kip-ink/60">
+          {invites.map((i) => (
+            <li key={i.id}>Pending: {i.email}</li>
+          ))}
+        </ul>
       )}
-      {error && <p className="mt-3 text-sm font-medium text-kip-red">{error}</p>}
-      <button
-        onClick={submit}
-        disabled={submitting || pin.length < 4}
-        className="mt-6 rounded-full bg-kip-purple px-8 py-3 font-display font-semibold text-white shadow-md disabled:opacity-40"
-      >
-        {configured ? "Unlock" : "Create PIN"}
-      </button>
-      <Link href="/" className="mt-8 text-sm text-kip-ink/40">
-        ← Back to profiles
-      </Link>
-    </main>
+    </div>
   );
 }
 
@@ -314,9 +289,15 @@ function Dashboard() {
     <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-8">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-3xl font-semibold text-kip-purple">Parent Area</h1>
-        <Link href="/" className="text-sm font-medium text-kip-ink/50 hover:text-kip-ink">
-          ← Back to profiles
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/" className="text-sm font-medium text-kip-ink/50 hover:text-kip-ink">
+            ← Back to profiles
+          </Link>
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- this hits an API route, not a page */}
+          <a href="/api/auth/signout" className="text-sm font-medium text-kip-ink/50 hover:text-kip-ink">
+            Sign out
+          </a>
+        </div>
       </div>
 
       <div className="mt-6 flex flex-wrap gap-2">
@@ -346,15 +327,14 @@ function Dashboard() {
 
       {selected && <ProfileStats key={selected.id} profile={selected} />}
 
-      <div className="mt-8">
+      <div className="mt-8 space-y-4">
         <AddProfileForm onAdded={refresh} />
+        <InviteCoParent />
       </div>
     </main>
   );
 }
 
 export default function ParentPage() {
-  const [authed, setAuthed] = useState(false);
-  if (!authed) return <PinGate onSuccess={() => setAuthed(true)} />;
   return <Dashboard />;
 }

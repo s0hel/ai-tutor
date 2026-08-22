@@ -54,12 +54,15 @@ export default function HomePage() {
         </div>
       )}
 
-      <Link
-        href="/parent"
-        className="mt-12 text-sm font-medium text-kip-ink/40 hover:text-kip-ink/70"
-      >
-        ⚙️ Parent Area
-      </Link>
+      <div className="mt-12 flex items-center gap-4">
+        <Link href="/parent" className="text-sm font-medium text-kip-ink/40 hover:text-kip-ink/70">
+          ⚙️ Parent Area
+        </Link>
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- this hits an API route, not a page */}
+        <a href="/api/auth/signout" className="text-sm font-medium text-kip-ink/40 hover:text-kip-ink/70">
+          Sign out
+        </a>
+      </div>
 
       <AnimatePresence>
         {active && (

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { callTutor, callTeachTurn, presentProblem, presentFeedback } from "@/lib/tutorEngine";
 import { evaluateBadges, nextSkillState } from "@/lib/difficulty";
 import {
-  getProfile,
+  getProfileForFamily,
   getSkillState,
   logAttempt,
   recentAttempts,
@@ -22,6 +23,9 @@ import {
 import type { ChatMessage, Subject, TutorTurn } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user) return NextResponse.json({ error: "Sign-in required" }, { status: 401 });
+
   const body = await req.json();
   const profileId = Number(body.profileId);
   const subject = body.subject as Subject;
@@ -29,7 +33,7 @@ export async function POST(req: NextRequest) {
   const skillSlug = body.skillSlug as string | undefined;
   const startPractice = !!body.startPractice;
 
-  const profile = getProfile(profileId);
+  const profile = getProfileForFamily(profileId, session.user.familyId);
   if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
   if (subject !== "math" && subject !== "reading") {
     return NextResponse.json({ error: "Invalid subject" }, { status: 400 });

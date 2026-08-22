@@ -1,23 +1,32 @@
 import { db } from "./db";
-import type { Attempt, Badge, Profile, SkillState, Subject } from "./types";
+import type { Attempt, Badge, Family, Parent, ParentInvite, Profile, SkillState, Subject } from "./types";
 
-export function listProfiles(): Profile[] {
-  return db.prepare("SELECT * FROM profiles ORDER BY createdAt ASC").all() as Profile[];
+export function listProfiles(familyId: number): Profile[] {
+  return db
+    .prepare("SELECT * FROM profiles WHERE familyId = ? ORDER BY createdAt ASC")
+    .all(familyId) as Profile[];
 }
 
-export function getProfile(id: number): Profile | undefined {
-  return db.prepare("SELECT * FROM profiles WHERE id = ?").get(id) as Profile | undefined;
+export function getProfileForFamily(id: number, familyId: number): Profile | undefined {
+  return db.prepare("SELECT * FROM profiles WHERE id = ? AND familyId = ?").get(id, familyId) as
+    | Profile
+    | undefined;
 }
 
-export function createProfile(name: string, age: number, avatarKey: string): Profile {
+export function createProfile(
+  familyId: number,
+  name: string,
+  age: number,
+  avatarKey: string
+): Profile {
   const info = db
-    .prepare("INSERT INTO profiles (name, age, avatarKey) VALUES (?, ?, ?)")
-    .run(name, age, avatarKey);
-  return getProfile(Number(info.lastInsertRowid))!;
+    .prepare("INSERT INTO profiles (familyId, name, age, avatarKey) VALUES (?, ?, ?, ?)")
+    .run(familyId, name, age, avatarKey);
+  return db.prepare("SELECT * FROM profiles WHERE id = ?").get(info.lastInsertRowid) as Profile;
 }
 
-export function deleteProfile(id: number): void {
-  db.prepare("DELETE FROM profiles WHERE id = ?").run(id);
+export function deleteProfile(id: number, familyId: number): void {
+  db.prepare("DELETE FROM profiles WHERE id = ? AND familyId = ?").run(id, familyId);
 }
 
 export function getSkillState(profileId: number, subject: Subject, topic: string): SkillState {
@@ -183,15 +192,48 @@ export function attemptStatsForTopic(
   return { total: rows.length, correct: rows.filter((r) => r.correct === 1).length };
 }
 
-export function getParentSettings(): { pinHash: string; sessionSecret: string } | undefined {
-  return db.prepare("SELECT pinHash, sessionSecret FROM parent_settings WHERE id = 1").get() as
-    | { pinHash: string; sessionSecret: string }
+export function createFamily(): Family {
+  const info = db.prepare("INSERT INTO families DEFAULT VALUES").run();
+  return db.prepare("SELECT * FROM families WHERE id = ?").get(info.lastInsertRowid) as Family;
+}
+
+export function getParentByGoogleSub(googleSub: string): Parent | undefined {
+  return db.prepare("SELECT * FROM parents WHERE googleSub = ?").get(googleSub) as
+    | Parent
     | undefined;
 }
 
-export function setParentSettings(pinHash: string, sessionSecret: string): void {
-  db.prepare(
-    `INSERT INTO parent_settings (id, pinHash, sessionSecret) VALUES (1, ?, ?)
-     ON CONFLICT(id) DO UPDATE SET pinHash = excluded.pinHash, sessionSecret = excluded.sessionSecret`
-  ).run(pinHash, sessionSecret);
+export function createParent(
+  familyId: number,
+  googleSub: string,
+  email: string,
+  name: string | null
+): Parent {
+  const info = db
+    .prepare("INSERT INTO parents (familyId, googleSub, email, name) VALUES (?, ?, ?, ?)")
+    .run(familyId, googleSub, email, name);
+  return db.prepare("SELECT * FROM parents WHERE id = ?").get(info.lastInsertRowid) as Parent;
+}
+
+export function createInvite(familyId: number, email: string, invitedByParentId: number): ParentInvite {
+  const info = db
+    .prepare("INSERT INTO parent_invites (familyId, email, invitedByParentId) VALUES (?, ?, ?)")
+    .run(familyId, email, invitedByParentId);
+  return db
+    .prepare("SELECT * FROM parent_invites WHERE id = ?")
+    .get(info.lastInsertRowid) as ParentInvite;
+}
+
+export function listInvitesForFamily(familyId: number): ParentInvite[] {
+  return db
+    .prepare("SELECT * FROM parent_invites WHERE familyId = ? ORDER BY createdAt ASC")
+    .all(familyId) as ParentInvite[];
+}
+
+export function consumeInviteForEmail(email: string): ParentInvite | undefined {
+  const invite = db
+    .prepare("SELECT * FROM parent_invites WHERE email = ? ORDER BY createdAt ASC LIMIT 1")
+    .get(email) as ParentInvite | undefined;
+  if (invite) db.prepare("DELETE FROM parent_invites WHERE id = ?").run(invite.id);
+  return invite;
 }

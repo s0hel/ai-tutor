@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { deleteProfile } from "@/lib/repo";
-import { SESSION_COOKIE, verifySessionToken } from "@/lib/parentAuth";
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!verifySessionToken(req.cookies.get(SESSION_COOKIE)?.value)) {
-    return NextResponse.json({ error: "Parent authentication required" }, { status: 401 });
-  }
+  const session = await auth();
+  if (!session?.user) return NextResponse.json({ error: "Sign-in required" }, { status: 401 });
+
   const { id } = await params;
-  deleteProfile(Number(id));
+  deleteProfile(Number(id), session.user.familyId);
   return NextResponse.json({ ok: true });
 }

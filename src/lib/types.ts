@@ -2,9 +2,32 @@ export type Subject = "math" | "reading";
 
 export interface Profile {
   id: number;
+  familyId: number;
   name: string;
   age: number;
   avatarKey: string;
+  createdAt: string;
+}
+
+export interface Family {
+  id: number;
+  createdAt: string;
+}
+
+export interface Parent {
+  id: number;
+  familyId: number;
+  googleSub: string;
+  email: string;
+  name: string | null;
+  createdAt: string;
+}
+
+export interface ParentInvite {
+  id: number;
+  familyId: number;
+  email: string;
+  invitedByParentId: number;
   createdAt: string;
 }
 

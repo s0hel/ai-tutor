@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { createProfile, listProfiles } from "@/lib/repo";
 import { AVATARS } from "@/lib/types";
-import { SESSION_COOKIE, verifySessionToken } from "@/lib/parentAuth";
 
 export async function GET() {
-  return NextResponse.json({ profiles: listProfiles() });
+  const session = await auth();
+  if (!session?.user) return NextResponse.json({ error: "Sign-in required" }, { status: 401 });
+  return NextResponse.json({ profiles: listProfiles(session.user.familyId) });
 }
 
 export async function POST(req: NextRequest) {
-  if (!verifySessionToken(req.cookies.get(SESSION_COOKIE)?.value)) {
-    return NextResponse.json({ error: "Parent authentication required" }, { status: 401 });
-  }
+  const session = await auth();
+  if (!session?.user) return NextResponse.json({ error: "Sign-in required" }, { status: 401 });
+
   const body = await req.json();
   const name = String(body.name ?? "").trim().slice(0, 40);
   const age = Number(body.age);
@@ -21,6 +23,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Age must be between 4 and 14" }, { status: 400 });
   }
 
-  const profile = createProfile(name, age, avatarKey);
+  const profile = createProfile(session.user.familyId, name, age, avatarKey);
   return NextResponse.json({ profile }, { status: 201 });
 }
