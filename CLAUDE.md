@@ -54,14 +54,18 @@ Every LLM call in `src/lib/tutorEngine/` forces a single structured tool call (`
 
 ### Parent auth
 
+Route protection is enforced by `src/proxy.ts` (Next.js 16 renamed `middleware.ts` to `proxy.ts` — don't go looking for the old filename) — it wraps `auth()` and redirects unauthenticated requests to `/` or `/parent/*` to `/api/auth/signin`, and 401s unauthenticated `/api/parent/*`, `/api/profiles/*`, `/api/chat`, `/api/skills/board` requests; its `matcher` list is the source of truth for which routes require a session.
+
 Google OAuth via Auth.js (`next-auth`), configured in `src/lib/auth.ts`. On first sign-in, a parent is attached to the family of a pending invite (`parent_invites`, consumed via `consumeInviteForEmail`) if one exists for their email, otherwise a brand-new `families` row is created for them. Session uses the JWT strategy with `familyId`/`parentId` embedded via the `jwt`/`session` callbacks — every API route reads `session.user.familyId` to scope data instead of a PIN or global admin flag. Requires `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` (Google Cloud Console credentials, with `http://localhost:3000/api/auth/callback/google` as an authorized redirect URI for local dev) and `AUTH_SECRET` in `.env.local`. The `parent_settings` table is a vestige of an earlier PIN-based scheme and is unused.
+
+For local testing without completing a real Google consent flow, a second provider (`id: "dev-login"`) is registered whenever `NODE_ENV !== "production"` — it signs straight in as the existing `hotmonkeys@gmail.com` parent record, no password. It shows up automatically as a second button ("Sign in with Dev Login (local only)") on the default `/api/auth/signin` page alongside Google; nothing else needs to reference it. It is absent from the providers array entirely in production builds — do not weaken that gate or make the bypass email configurable at runtime.
 
 ### Frontend flow
 
 - `/` (`src/app/page.tsx`) — profile picker.
 - `/learn/board` — math skill-tree (`SkillBoard`) to pick a skill; reading skips straight to `/learn/[subject]`.
 - `/learn/[subject]` — the chat/voice session UI; drives `/api/chat`, plays `spokenText` via TTS and captures answers via STT (`src/hooks/useSpeech.ts`), both browser-native (no server-side speech APIs). Falls back to typed input where STT is unsupported (notably iOS Safari).
-- `/parent` — PIN-gated dashboard (`/api/parent/stats`) plus profile management (`/api/profiles`).
+- `/parent` — Google-sign-in-gated dashboard (`/api/parent/stats`) plus profile management (`/api/profiles`).
 
 ### Local HTTPS
 
