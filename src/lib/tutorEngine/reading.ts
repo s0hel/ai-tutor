@@ -1,23 +1,8 @@
-import Anthropic from "@anthropic-ai/sdk";
-import type { Attempt, ChatMessage, Profile, SkillState, Subject, TutorTurn } from "./types";
+import type Anthropic from "@anthropic-ai/sdk";
+import type { Attempt, ChatMessage, Profile, SkillState, Subject, TutorTurn } from "../types";
+import { getClient, MODEL } from "./client";
 
-const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
-
-let client: Anthropic | null = null;
-function getClient(): Anthropic {
-  if (!client) {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      throw new Error(
-        "ANTHROPIC_API_KEY is not set. Add it to .env.local (see .env.example)."
-      );
-    }
-    client = new Anthropic({ apiKey });
-  }
-  return client;
-}
-
-const TUTOR_TOOL: Anthropic.Tool = {
+export const TUTOR_TOOL: Anthropic.Tool = {
   name: "tutor_turn",
   description:
     "Deliver the tutor's next turn to the kid. Always call this tool exactly once per turn instead of replying in plain text.",
