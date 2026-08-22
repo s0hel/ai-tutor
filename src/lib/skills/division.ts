@@ -8,6 +8,8 @@ export const DIVISION_SKILLS: Skill[] = [
     title: "Dividing by a 1-digit number",
     order: 1,
     generatorId: "div-1digit-divisor",
+    videoId: "KFzcwWTEDDI",
+    videoTitle: "Dividing numbers: intro to long division | 4th grade | Khan Academy",
     conceptBrief: {
       summary:
         "Division asks 'how many equal groups fit inside this number?' A good strategy is to estimate with a nearby round multiple, then adjust up or down.",
@@ -25,6 +27,8 @@ export const DIVISION_SKILLS: Skill[] = [
     title: "Dividing with a remainder",
     order: 2,
     generatorId: "div-1digit-remainder",
+    videoId: "MbpmP1esh-Q",
+    videoTitle: "Dividing numbers: example with remainders | Multiplication and division | Arithmetic | Khan Academy",
     conceptBrief: {
       summary:
         "Sometimes a number doesn't split evenly. Find the largest multiple of the divisor that's still less than the dividend — whatever's left over is the remainder. Write answers like '12 r 3'.",
@@ -42,6 +46,8 @@ export const DIVISION_SKILLS: Skill[] = [
     title: "Dividing by a 2-digit number",
     order: 3,
     generatorId: "div-2digit-divisor",
+    videoId: "KzdbThwGNGI",
+    videoTitle: "Introduction to dividing by 2 digits | Khan Academy",
     conceptBrief: {
       summary:
         "Same idea as dividing by a 1-digit number, just with a bigger group size — estimate with a round number first, then refine your guess.",
@@ -58,6 +64,8 @@ export const DIVISION_SKILLS: Skill[] = [
     title: "Interpreting remainders in word problems",
     order: 4,
     generatorId: "div-remainder-interpretation",
+    videoId: "P1qyjdh_sIw",
+    videoTitle: "Introduction to remainders | Khan Academy",
     conceptBrief: {
       summary:
         "In real situations, what you do with a remainder depends on the question. If leftovers still need a spot (like needing another box), round UP. If the question only cares about full complete groups, ignore the remainder and keep the answer as is.",

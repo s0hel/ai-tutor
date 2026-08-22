@@ -2,7 +2,17 @@
 
 import { useState } from "react";
 
-export default function KhanVideo({ videoId, title }: { videoId: string; title: string }) {
+export default function KhanVideo({
+  videoId,
+  title,
+  source = "Khan Academy",
+  sourceUrl = "https://www.khanacademy.org",
+}: {
+  videoId: string;
+  title: string;
+  source?: string;
+  sourceUrl?: string;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -25,7 +35,12 @@ export default function KhanVideo({ videoId, title }: { videoId: string; title: 
               allowFullScreen
             />
           </div>
-          <p className="mt-1 text-xs text-kip-ink/40">Video by Khan Academy · khanacademy.org</p>
+          <p className="mt-1 text-xs text-kip-ink/40">
+            Video by {source} ·{" "}
+            <a href={sourceUrl} target="_blank" rel="noreferrer" className="underline">
+              {sourceUrl.replace(/^https?:\/\//, "")}
+            </a>
+          </p>
         </div>
       )}
     </div>

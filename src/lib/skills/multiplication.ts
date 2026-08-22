@@ -8,6 +8,8 @@ export const MULTIPLICATION_SKILLS: Skill[] = [
     title: "Multiplying a 2-digit number by a 1-digit number",
     order: 1,
     generatorId: "mult-2digit-1digit",
+    videoId: "SfxULALs_u8",
+    videoTitle: "Multiplying: 2 digits times 1 digit (with carrying) | Arithmetic | Khan Academy",
     conceptBrief: {
       summary:
         "To multiply a bigger number by a small one, split the bigger number into tens and ones, multiply each part separately, then add the results back together. This is called the distributive property.",
@@ -28,6 +30,8 @@ export const MULTIPLICATION_SKILLS: Skill[] = [
     title: "Multiplying a 3-digit number by a 1-digit number",
     order: 2,
     generatorId: "mult-3digit-1digit",
+    videoId: "TqRReFvbpXA",
+    videoTitle: "Multiplying: 3 digits times 1 digit (with carrying) | Arithmetic | Khan Academy",
     conceptBrief: {
       summary:
         "Same idea as 2-digit multiplication, but now you split the number into hundreds and the rest, multiply each piece by the 1-digit number, then add the pieces together.",
@@ -48,6 +52,8 @@ export const MULTIPLICATION_SKILLS: Skill[] = [
     title: "Multiplying two 2-digit numbers",
     order: 3,
     generatorId: "mult-2digit-2digit",
+    videoId: "DaQlieZH1kk",
+    videoTitle: "Multiplying: 2 digit numbers | Multiplication and division | 4th grade | Khan Academy",
     conceptBrief: {
       summary:
         "Break one of the numbers into tens and ones, multiply the OTHER whole number by each part, then add the two results. This takes an extra step compared to single-digit multiplication, so it helps to write down the partial products.",
@@ -68,6 +74,8 @@ export const MULTIPLICATION_SKILLS: Skill[] = [
     title: "Multiplying larger numbers by a 2-digit number",
     order: 4,
     generatorId: "mult-multidigit",
+    videoId: "lH6ptl4_LCE",
+    videoTitle: "Example multiplying multi digit numbers | Khan Academy",
     conceptBrief: {
       summary:
         "The same splitting strategy scales up: break the 2-digit number into tens and ones, multiply the larger number by each part, then add. It just takes more careful bookkeeping since the numbers are bigger.",
@@ -87,6 +95,8 @@ export const MULTIPLICATION_SKILLS: Skill[] = [
     title: "Multiplying by 10, 100, and 1000",
     order: 5,
     generatorId: "mult-by-powers-of-ten",
+    videoId: "yVg6LyNgIT8",
+    videoTitle: "Multiplying and dividing by 10, 100, 1000 | Khan Academy",
     conceptBrief: {
       summary:
         "Multiplying by 10, 100, or 1000 just shifts every digit to the left — you can find the answer fast by counting the zeros in the power of ten and adding that many zeros to the end of the other number.",

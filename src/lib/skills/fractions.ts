@@ -45,6 +45,8 @@ export const FRACTION_SKILLS: Skill[] = [
     title: "Adding fractions with the same denominator",
     order: 3,
     generatorId: "fraction-add-like",
+    videoId: "EJjnEau6aeI",
+    videoTitle: "Adding fractions with like denominators | Fractions | Pre-Algebra | Khan Academy",
     conceptBrief: {
       summary: "When denominators already match, just add the numerators and keep the denominator the same.",
       workedExamples: ["1/5 + 2/5 = 3/5."],
@@ -94,6 +96,8 @@ export const FRACTION_SKILLS: Skill[] = [
     title: "Converting between mixed numbers and improper fractions",
     order: 6,
     generatorId: "fraction-mixed-improper",
+    videoId: "1xuf6ZKF1_I",
+    videoTitle: "Mixed numbers and improper fractions | Fractions | Pre-Algebra | Khan Academy",
     conceptBrief: {
       summary:
         "To go from a mixed number to an improper fraction: multiply the whole number by the denominator, add the numerator, and keep the same denominator. To go the other way: divide the numerator by the denominator — the quotient is the whole number, and the remainder becomes the new numerator.",
@@ -108,6 +112,8 @@ export const FRACTION_SKILLS: Skill[] = [
     title: "Multiplying a fraction by a whole number",
     order: 7,
     generatorId: "fraction-multiply-whole",
+    videoId: "XaJQse2u5TQ",
+    videoTitle: "Conceptual understanding of multiplying fractions and whole numbers | Khan Academy",
     conceptBrief: {
       summary: "Multiply only the numerator by the whole number — the denominator stays the same.",
       workedExamples: ["2/5 × 3 = 6/5."],

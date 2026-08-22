@@ -55,7 +55,12 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [skillTitle, setSkillTitle] = useState<string | null>(null);
-  const [skillVideo, setSkillVideo] = useState<{ videoId: string; title: string } | null>(null);
+  const [skillVideo, setSkillVideo] = useState<{
+    videoId: string;
+    title: string;
+    source?: string;
+    sourceUrl?: string;
+  } | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
@@ -90,11 +95,29 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
       .then((r) => r.json())
       .then(
         (data: {
-          strands: { skills: { slug: string; title: string; videoId?: string; videoTitle?: string }[] }[];
+          strands: {
+            skills: {
+              slug: string;
+              title: string;
+              videoId?: string;
+              videoTitle?: string;
+              videoSource?: string;
+              videoSourceUrl?: string;
+            }[];
+          }[];
         }) => {
           const found = data.strands.flatMap((s) => s.skills).find((s) => s.slug === skillSlug);
           setSkillTitle(found?.title ?? null);
-          setSkillVideo(found?.videoId ? { videoId: found.videoId, title: found.videoTitle ?? found.title } : null);
+          setSkillVideo(
+            found?.videoId
+              ? {
+                  videoId: found.videoId,
+                  title: found.videoTitle ?? found.title,
+                  source: found.videoSource,
+                  sourceUrl: found.videoSourceUrl,
+                }
+              : null
+          );
         }
       );
   }, [subject, skillSlug]);
@@ -230,7 +253,12 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
       </header>
 
       {subject === "math" && phase === "teach" && skillVideo && (
-        <KhanVideo videoId={skillVideo.videoId} title={skillVideo.title} />
+        <KhanVideo
+          videoId={skillVideo.videoId}
+          title={skillVideo.title}
+          source={skillVideo.source}
+          sourceUrl={skillVideo.sourceUrl}
+        />
       )}
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-6">
