@@ -37,7 +37,14 @@ export async function callTeachTurn(
   skill: Skill,
   history: ChatMessage[]
 ): Promise<TutorTurn> {
-  const system = [teachSafetyPreamble(profile, skill), conceptGuidance(skill)].join("\n\n");
+  // Stable for the whole teach phase (same profile/skill) — one cache breakpoint covers it.
+  const system: Anthropic.TextBlockParam[] = [
+    {
+      type: "text",
+      text: [teachSafetyPreamble(profile, skill), conceptGuidance(skill)].join("\n\n"),
+      cache_control: { type: "ephemeral" },
+    },
+  ];
 
   const messages: Anthropic.MessageParam[] = history.map((m) => ({
     role: m.role === "kid" ? "user" : "assistant",

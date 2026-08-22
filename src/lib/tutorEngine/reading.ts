@@ -90,9 +90,17 @@ export async function callTutor(
   state: SkillState,
   recent: Attempt[]
 ): Promise<TutorTurn> {
-  const system = [safetyPreamble(profile, subject), subjectGuidance(subject), performanceSummary(state, recent)].join(
-    "\n\n"
-  );
+  // safetyPreamble/subjectGuidance are stable for the whole session (same profile/subject);
+  // performanceSummary changes every turn (streak/level/recent attempts), so it stays
+  // uncached and after the breakpoint rather than busting the cached prefix each turn.
+  const system: Anthropic.TextBlockParam[] = [
+    {
+      type: "text",
+      text: [safetyPreamble(profile, subject), subjectGuidance(subject)].join("\n\n"),
+      cache_control: { type: "ephemeral" },
+    },
+    { type: "text", text: performanceSummary(state, recent) },
+  ];
 
   const messages: Anthropic.MessageParam[] = history.map((m) => ({
     role: m.role === "kid" ? "user" : "assistant",

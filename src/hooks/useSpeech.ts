@@ -31,6 +31,7 @@ export function useSpeech() {
     const pickVoice = () => {
       const voices = window.speechSynthesis.getVoices();
       voiceRef.current =
+        voices.find((v) => /evan/i.test(v.name)) ??
         voices.find((v) => /en-US|en_GB|en-GB/.test(v.lang) && /female|samantha|victoria/i.test(v.name)) ??
         voices.find((v) => v.lang.startsWith("en")) ??
         voices[0] ??
@@ -44,7 +45,10 @@ export function useSpeech() {
   const speak = useCallback(
     (text: string) => {
       if (typeof window === "undefined" || !window.speechSynthesis || muted || !text) return;
-      window.speechSynthesis.cancel();
+      const synth = window.speechSynthesis;
+      const wasSpeaking = synth.speaking || synth.pending;
+      if (wasSpeaking) synth.cancel();
+
       const utterance = new SpeechSynthesisUtterance(text);
       if (voiceRef.current) utterance.voice = voiceRef.current;
       utterance.rate = 0.95;
@@ -52,7 +56,14 @@ export function useSpeech() {
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
+
+      // Chrome/macOS clips the start of the next utterance if speak() runs
+      // immediately after cancel() — the engine needs a beat to actually stop.
+      if (wasSpeaking) {
+        setTimeout(() => synth.speak(utterance), 50);
+      } else {
+        synth.speak(utterance);
+      }
     },
     [muted]
   );

@@ -2,7 +2,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import type { ActivityType, Profile } from "../types";
 import type { Skill } from "../skills";
 import type { AnswerType, GeneratedProblem } from "../problemGenerators/types";
-import { getClient, MODEL } from "./client";
+import { getClient, HAIKU_MODEL } from "./client";
 
 const PRESENT_TOOL: Anthropic.Tool = {
   name: "present_problem",
@@ -79,14 +79,21 @@ export async function presentProblem(params: {
   problem: GeneratedProblem;
 }): Promise<{ spokenText: string; displayText: string }> {
   const { profile, skill, problem } = params;
-  const system = [
-    presentSafetyPreamble(profile, skill),
-    `Fixed problem data (do not alter): ${JSON.stringify(problem.problemData)}`,
-    answerFormatGuidance(problem.answerType),
-  ].join("\n\n");
+  // presentSafetyPreamble is stable across problems within the same skill's practice session;
+  // the problem data is fresh every call, so it stays uncached and after the breakpoint.
+  const system: Anthropic.TextBlockParam[] = [
+    { type: "text", text: presentSafetyPreamble(profile, skill), cache_control: { type: "ephemeral" } },
+    {
+      type: "text",
+      text: [
+        `Fixed problem data (do not alter): ${JSON.stringify(problem.problemData)}`,
+        answerFormatGuidance(problem.answerType),
+      ].join("\n\n"),
+    },
+  ];
 
   const response = await getClient().messages.create({
-    model: MODEL,
+    model: HAIKU_MODEL,
     max_tokens: 512,
     system,
     messages: [{ role: "user", content: "Present this problem to me now." }],
@@ -125,10 +132,15 @@ export async function presentFeedback(params: {
     .filter(Boolean)
     .join("\n");
 
-  const system = [feedbackSafetyPreamble(profile, skill), groundTruth].join("\n\n");
+  // feedbackSafetyPreamble is stable across attempts within the same skill's practice session;
+  // groundTruth (the actual answer/hint) is fresh every call, so it stays uncached.
+  const system: Anthropic.TextBlockParam[] = [
+    { type: "text", text: feedbackSafetyPreamble(profile, skill), cache_control: { type: "ephemeral" } },
+    { type: "text", text: groundTruth },
+  ];
 
   const response = await getClient().messages.create({
-    model: MODEL,
+    model: HAIKU_MODEL,
     max_tokens: 512,
     system,
     messages: [{ role: "user", content: "Give me feedback on my answer now." }],
