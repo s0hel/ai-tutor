@@ -233,6 +233,11 @@ export async function getParentByGoogleSub(googleSub: string): Promise<Parent | 
   return rows[0];
 }
 
+export async function getParentByEmail(email: string): Promise<Parent | undefined> {
+  const rows = await query<Parent>(`SELECT ${PARENT_COLS} FROM parents WHERE email = $1`, [email]);
+  return rows[0];
+}
+
 export async function createParent(
   familyId: number,
   googleSub: string,

@@ -10,6 +10,7 @@ Kip's Learning Club — a local-network Next.js app that tutors kids (ages 6-10)
 
 ## Commands
 
+- `docker compose up -d` — starts local Postgres (`localhost:5432`, see `docker-compose.yml`); run this before `npm run dev` the first time and any time the container isn't already up
 - `npm run dev` — dev server (http://localhost:3000)
 - `npm run dev:https` — dev server over HTTPS via mkcert certs in `certs/` (needed for mic access from other devices on the LAN; see README)
 - `npm run build` / `npm run start` — production build/serve
@@ -17,7 +18,7 @@ Kip's Learning Club — a local-network Next.js app that tutors kids (ages 6-10)
 - `npm run lint` — ESLint (flat config, `eslint-config-next`)
 - No test suite exists in this repo.
 
-Data lives in a gitignored SQLite file at `data/tutor.db` (better-sqlite3, WAL mode), created/migrated automatically on first `db` import — see `src/lib/db.ts`. Requires `ANTHROPIC_API_KEY` in `.env.local` (copy from `.env.example`).
+Data lives in Postgres — locally via the Docker container above, in production via a hosted provider (e.g. Supabase). Requires `DATABASE_URL` in `.env.local` (copy from `.env.example`; the default value matches the Docker container's credentials), plus `ANTHROPIC_API_KEY`, `AUTH_SECRET`, and `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` (for parent Google sign-in — see Parent auth below). Migrations run automatically on first `db` import — see `src/lib/db.ts`.
 
 ## Architecture
 
@@ -49,11 +50,11 @@ Every LLM call in `src/lib/tutorEngine/` forces a single structured tool call (`
 
 ### Persistence
 
-`src/lib/db.ts` opens a single global `better-sqlite3` connection (cached on `globalThis` in dev to survive HMR) and runs `CREATE TABLE IF NOT EXISTS` + ad hoc `ensureColumn()` migrations on import — there is no migration framework/history. `src/lib/repo.ts` is the only place that issues SQL; add new queries there rather than importing `db` elsewhere.
+`src/lib/db.ts` opens a `pg` connection pool against `DATABASE_URL` (cached on `globalThis` in dev to survive HMR), and runs idempotent `CREATE TABLE IF NOT EXISTS` / `ADD COLUMN IF NOT EXISTS` migrations on import — there is no migration framework/history. SSL is enabled automatically when `NODE_ENV === "production"` (required by most hosted Postgres, e.g. Supabase) and left off for local/Docker Postgres. All queries are async and go through the exported `query()` helper; `src/lib/repo.ts` and `src/lib/pendingProblems.ts` are the only places that issue SQL — add new queries there rather than importing `db`/`query` elsewhere. Column names are camelCase and double-quoted in every query (Postgres folds unquoted identifiers to lowercase) — keep new queries consistent with that.
 
 ### Parent auth
 
-PIN-based, no external auth provider. `src/lib/parentAuth.ts` stores a salted scrypt hash + HMAC session secret in the single-row `parent_settings` table; session token is `issuedAt.hmac`, verified with `timingSafeEqual`, set as an httpOnly cookie (`parent_session`). `POST /api/parent/auth` both bootstraps the PIN on first use and logs in on subsequent calls — there's no separate signup step.
+Google OAuth via Auth.js (`next-auth`), configured in `src/lib/auth.ts`. On first sign-in, a parent is attached to the family of a pending invite (`parent_invites`, consumed via `consumeInviteForEmail`) if one exists for their email, otherwise a brand-new `families` row is created for them. Session uses the JWT strategy with `familyId`/`parentId` embedded via the `jwt`/`session` callbacks — every API route reads `session.user.familyId` to scope data instead of a PIN or global admin flag. Requires `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` (Google Cloud Console credentials, with `http://localhost:3000/api/auth/callback/google` as an authorized redirect URI for local dev) and `AUTH_SECRET` in `.env.local`. The `parent_settings` table is a vestige of an earlier PIN-based scheme and is unused.
 
 ### Frontend flow
 
