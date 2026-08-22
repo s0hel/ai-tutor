@@ -25,7 +25,18 @@ export function getSkillState(profileId: number, subject: Subject, topic: string
     .prepare("SELECT * FROM skill_state WHERE profileId = ? AND subject = ? AND topic = ?")
     .get(profileId, subject, topic) as SkillState | undefined;
   if (row) return row;
-  return { profileId, subject, topic, level: 1, streak: 0, updatedAt: new Date().toISOString() };
+  return {
+    profileId,
+    subject,
+    topic,
+    level: 1,
+    streak: 0,
+    updatedAt: new Date().toISOString(),
+    status: "not_started",
+    masteredAt: null,
+    lastReviewedAt: null,
+    teachCompletedAt: null,
+  };
 }
 
 export function listSkillStates(profileId: number, subject?: Subject): SkillState[] {
@@ -39,10 +50,19 @@ export function listSkillStates(profileId: number, subject?: Subject): SkillStat
 
 export function upsertSkillState(state: SkillState): void {
   db.prepare(
-    `INSERT INTO skill_state (profileId, subject, topic, level, streak, updatedAt)
-     VALUES (@profileId, @subject, @topic, @level, @streak, datetime('now'))
+    `INSERT INTO skill_state
+       (profileId, subject, topic, level, streak, updatedAt, status, masteredAt, lastReviewedAt, teachCompletedAt)
+     VALUES
+       (@profileId, @subject, @topic, @level, @streak, datetime('now'), @status, @masteredAt, @lastReviewedAt, @teachCompletedAt)
      ON CONFLICT(profileId, subject, topic)
-     DO UPDATE SET level = @level, streak = @streak, updatedAt = datetime('now')`
+     DO UPDATE SET
+       level = @level,
+       streak = @streak,
+       updatedAt = datetime('now'),
+       status = @status,
+       masteredAt = @masteredAt,
+       lastReviewedAt = @lastReviewedAt,
+       teachCompletedAt = @teachCompletedAt`
   ).run(state);
 }
 
@@ -129,6 +149,38 @@ export function currentDailyStreak(profileId: number): number {
     }
   }
   return streak;
+}
+
+export function recordSkillPracticeDay(profileId: number, subject: Subject, topic: string): void {
+  const day = new Date().toISOString().slice(0, 10);
+  db.prepare(
+    "INSERT OR IGNORE INTO skill_practice_days (profileId, subject, topic, day) VALUES (?, ?, ?, ?)"
+  ).run(profileId, subject, topic, day);
+}
+
+export function skillPracticeDayCount(profileId: number, subject: Subject, topic: string): number {
+  const row = db
+    .prepare(
+      "SELECT COUNT(DISTINCT day) AS c FROM skill_practice_days WHERE profileId = ? AND subject = ? AND topic = ?"
+    )
+    .get(profileId, subject, topic) as { c: number };
+  return row.c;
+}
+
+export function attemptStatsForTopic(
+  profileId: number,
+  subject: Subject,
+  topic: string,
+  limit = 8
+): { total: number; correct: number } {
+  const rows = db
+    .prepare(
+      `SELECT correct FROM attempts
+       WHERE profileId = ? AND subject = ? AND topic = ? AND correct IS NOT NULL
+       ORDER BY id DESC LIMIT ?`
+    )
+    .all(profileId, subject, topic, limit) as { correct: number }[];
+  return { total: rows.length, correct: rows.filter((r) => r.correct === 1).length };
 }
 
 export function getParentSettings(): { pinHash: string; sessionSecret: string } | undefined {

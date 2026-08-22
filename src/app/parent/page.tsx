@@ -5,14 +5,23 @@ import Link from "next/link";
 import AvatarIcon from "@/components/AvatarIcon";
 import Mascot from "@/components/Mascot";
 import { AVATARS, BADGES, type Attempt, type Badge, type Profile, type SkillState } from "@/lib/types";
+import type { SkillBoardEntry } from "@/components/SkillBoard";
+import type { Strand } from "@/lib/skills";
 
 interface StatsResponse {
   profile: Profile;
   dailyStreak: number;
   badges: Badge[];
-  math: { total: number; correct: number; accuracy: number | null; topics: SkillState[] };
+  math: {
+    total: number;
+    correct: number;
+    accuracy: number | null;
+    topics: SkillState[];
+    board: SkillBoardEntry[];
+  };
   reading: { total: number; correct: number; accuracy: number | null; topics: SkillState[] };
   recentAttempts: Attempt[];
+  strandMeta: Record<Strand, { label: string; emoji: string; order: number }>;
 }
 
 function PinGate({ onSuccess }: { onSuccess: () => void }) {
@@ -185,7 +194,7 @@ function ProfileStats({ profile }: { profile: Profile }) {
 
   if (!stats) return <p className="mt-4 text-sm text-kip-ink/50">Loading...</p>;
 
-  const subjectCard = (label: string, data: StatsResponse["math"]) => (
+  const subjectCard = (label: string, data: StatsResponse["reading"]) => (
     <div className="rounded-2xl bg-white p-4 shadow-sm">
       <h4 className="font-display font-semibold text-kip-ink">{label}</h4>
       <p className="mt-1 text-sm text-kip-ink/60">
@@ -204,6 +213,38 @@ function ProfileStats({ profile }: { profile: Profile }) {
     </div>
   );
 
+  const mathBoardCard = () => {
+    const strands = Array.from(new Set(stats.math.board.map((e) => e.skill.strand))).sort(
+      (a, b) => stats.strandMeta[a].order - stats.strandMeta[b].order
+    );
+    return (
+      <div className="rounded-2xl bg-white p-4 shadow-sm">
+        <h4 className="font-display font-semibold text-kip-ink">🔢 Math</h4>
+        <p className="mt-1 text-sm text-kip-ink/60">
+          {stats.math.total} questions answered
+          {stats.math.accuracy !== null && ` · ${stats.math.accuracy}% correct`}
+        </p>
+        <ul className="mt-2 space-y-1.5 text-sm">
+          {strands.map((strand) => {
+            const entries = stats.math.board.filter((e) => e.skill.strand === strand);
+            const mastered = entries.filter((e) => e.status === "mastered").length;
+            const practicing = entries.filter((e) => e.status === "practicing").length;
+            return (
+              <li key={strand} className="flex justify-between text-kip-ink/70">
+                <span>
+                  {stats.strandMeta[strand].emoji} {stats.strandMeta[strand].label}
+                </span>
+                <span>
+                  {mastered}/{entries.length} mastered{practicing > 0 && ` · ${practicing} practicing`}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  };
+
   return (
     <div className="mt-4 space-y-4">
       <div className="flex flex-wrap gap-3">
@@ -218,7 +259,7 @@ function ProfileStats({ profile }: { profile: Profile }) {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {subjectCard("🔢 Math", stats.math)}
+        {mathBoardCard()}
         {subjectCard("📚 Reading", stats.reading)}
       </div>
 

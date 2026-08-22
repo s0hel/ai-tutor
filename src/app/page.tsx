@@ -83,7 +83,7 @@ export default function HomePage() {
               </h2>
               <div className="mt-6 flex flex-col gap-3">
                 <Link
-                  href={`/learn/math?profile=${active.id}`}
+                  href={`/learn/board?profile=${active.id}`}
                   className="rounded-2xl bg-kip-teal px-6 py-4 font-display text-xl font-semibold text-white shadow-md transition hover:brightness-105"
                 >
                   🔢 Math

@@ -7,6 +7,8 @@ import {
   listBadges,
   listSkillStates,
 } from "@/lib/repo";
+import { getSkillBoard } from "@/lib/skillBoard";
+import { STRAND_META } from "@/lib/skills";
 
 export async function GET(req: NextRequest) {
   if (!verifySessionToken(req.cookies.get(SESSION_COOKIE)?.value)) {
@@ -38,8 +40,9 @@ export async function GET(req: NextRequest) {
     profile,
     dailyStreak,
     badges,
-    math: bySubject("math"),
+    math: { ...bySubject("math"), board: getSkillBoard(profileId) },
     reading: bySubject("reading"),
     recentAttempts: attempts.slice(0, 30),
+    strandMeta: STRAND_META,
   });
 }

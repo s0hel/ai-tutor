@@ -8,6 +8,8 @@ export interface Profile {
   createdAt: string;
 }
 
+export type SkillStatus = "not_started" | "practicing" | "mastered";
+
 export interface SkillState {
   profileId: number;
   subject: Subject;
@@ -15,6 +17,10 @@ export interface SkillState {
   level: number;
   streak: number;
   updatedAt: string;
+  status: SkillStatus;
+  masteredAt: string | null;
+  lastReviewedAt: string | null;
+  teachCompletedAt: string | null;
 }
 
 export interface Attempt {

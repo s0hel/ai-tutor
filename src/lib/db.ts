@@ -67,7 +67,41 @@ function createDb() {
       PRIMARY KEY (profileId, day),
       FOREIGN KEY (profileId) REFERENCES profiles(id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS pending_problems (
+      profileId INTEGER NOT NULL,
+      subject TEXT NOT NULL,
+      topic TEXT NOT NULL,
+      problemData TEXT NOT NULL,
+      answerType TEXT NOT NULL,
+      correctAnswer TEXT NOT NULL,
+      hintLadder TEXT NOT NULL,
+      explanation TEXT NOT NULL,
+      attemptCount INTEGER NOT NULL DEFAULT 0,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+      PRIMARY KEY (profileId, subject, topic),
+      FOREIGN KEY (profileId) REFERENCES profiles(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS skill_practice_days (
+      profileId INTEGER NOT NULL,
+      subject TEXT NOT NULL,
+      topic TEXT NOT NULL,
+      day TEXT NOT NULL,
+      PRIMARY KEY (profileId, subject, topic, day),
+      FOREIGN KEY (profileId) REFERENCES profiles(id) ON DELETE CASCADE
+    );
   `);
+
+  function ensureColumn(table: string, column: string, ddl: string) {
+    const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+    if (!cols.some((c) => c.name === column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+  }
+  ensureColumn("skill_state", "status", `status TEXT NOT NULL DEFAULT 'not_started'`);
+  ensureColumn("skill_state", "masteredAt", `masteredAt TEXT`);
+  ensureColumn("skill_state", "lastReviewedAt", `lastReviewedAt TEXT`);
+  ensureColumn("skill_state", "teachCompletedAt", `teachCompletedAt TEXT`);
+
   return db;
 }
 

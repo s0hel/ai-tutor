@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, use, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence } from "framer-motion";
 import Mascot, { type MascotMood } from "@/components/Mascot";
@@ -48,9 +48,12 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
   const subject = (rawSubject === "reading" ? "reading" : "math") as Subject;
   const meta = SUBJECT_META[subject];
   const searchParams = useSearchParams();
+  const router = useRouter();
   const profileId = Number(searchParams.get("profile"));
+  const skillSlug = searchParams.get("skill");
 
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [skillTitle, setSkillTitle] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
@@ -59,10 +62,17 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
   const [confettiKey, setConfettiKey] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [mood, setMood] = useState<MascotMood>("idle");
+  const [phase, setPhase] = useState<"teach" | "practice" | "freeform">("freeform");
 
   const initialized = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const speech = useSpeech();
+
+  useEffect(() => {
+    if (subject === "math" && !skillSlug) {
+      router.replace(`/learn/board?profile=${profileId}`);
+    }
+  }, [subject, skillSlug, profileId, router]);
 
   useEffect(() => {
     fetch("/api/profiles")
@@ -72,7 +82,17 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
       });
   }, [profileId]);
 
-  const sendTurn = async (history: ChatMessage[]) => {
+  useEffect(() => {
+    if (subject !== "math" || !skillSlug) return;
+    fetch("/api/skills")
+      .then((r) => r.json())
+      .then((data: { strands: { skills: { slug: string; title: string }[] }[] }) => {
+        const found = data.strands.flatMap((s) => s.skills).find((s) => s.slug === skillSlug);
+        setSkillTitle(found?.title ?? null);
+      });
+  }, [subject, skillSlug]);
+
+  const sendTurn = async (history: ChatMessage[], opts?: { startPractice?: boolean }) => {
     setLoading(true);
     setError(null);
     setMood("thinking");
@@ -80,26 +100,50 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ profileId, subject, history }),
+        body: JSON.stringify({
+          profileId,
+          subject,
+          history,
+          skillSlug: subject === "math" ? skillSlug : undefined,
+          startPractice: opts?.startPractice ?? false,
+        }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error ?? "Something went wrong");
       }
-      const data: { turn: TutorTurn; badgesEarned: { key: string; label: string }[] } = await res.json();
-      const tutorMessage: ChatMessage = { role: "tutor", text: data.turn.displayText, turn: data.turn };
-      setMessages((prev) => [...prev, tutorMessage]);
-      speech.speak(data.turn.spokenText);
+      const data: {
+        turns: TutorTurn[];
+        phase: "teach" | "practice" | "freeform";
+        badgesEarned: { key: string; label: string }[];
+        masteredSkill?: string | null;
+      } = await res.json();
 
-      if (data.turn.isCorrectAnswer === true || data.turn.activityType === "celebration") {
+      setPhase(data.phase);
+      const newMessages: ChatMessage[] = data.turns.map((turn) => ({
+        role: "tutor",
+        text: turn.displayText,
+        turn,
+      }));
+      setMessages((prev) => [...prev, ...newMessages]);
+      const lastTurnData = data.turns[data.turns.length - 1];
+      speech.speak(data.turns.map((t) => t.spokenText).join(" "));
+
+      if (lastTurnData.isCorrectAnswer === true || lastTurnData.activityType === "celebration") {
         setMood("celebrating");
-      } else if (data.turn.isCorrectAnswer === false) {
+      } else if (lastTurnData.isCorrectAnswer === false) {
         setMood("encouraging");
       } else {
         setMood("idle");
       }
 
-      if (data.badgesEarned.length > 0) {
+      if (data.masteredSkill) {
+        setShowConfetti(true);
+        setConfettiKey((k) => k + 1);
+        setBadgeToast("Skill Mastered! 🌟");
+        setTimeout(() => setShowConfetti(false), 2200);
+        setTimeout(() => setBadgeToast(null), 3200);
+      } else if (data.badgesEarned.length > 0) {
         setShowConfetti(true);
         setConfettiKey((k) => k + 1);
         setBadgeToast(data.badgesEarned[0].label);
@@ -115,11 +159,11 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
   };
 
   useEffect(() => {
-    if (!profile || initialized.current) return;
+    if (!profile || initialized.current || (subject === "math" && !skillSlug)) return;
     initialized.current = true;
     sendTurn([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile]);
+  }, [profile, skillSlug]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -134,9 +178,13 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
     sendTurn(next);
   };
 
+  const startPractice = () => {
+    sendTurn(messages, { startPractice: true });
+  };
+
   const lastTurn = [...messages].reverse().find((m) => m.turn)?.turn;
 
-  if (!profile) {
+  if (!profile || (subject === "math" && !skillSlug)) {
     return (
       <main className="flex flex-1 items-center justify-center">
         <Mascot mood="thinking" />
@@ -147,14 +195,20 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
   return (
     <main className="flex min-h-dvh flex-1 flex-col bg-kip-cream">
       <header className={`flex items-center justify-between gap-3 px-4 py-3 text-white ${meta.color}`}>
-        <Link href="/" className="text-2xl" aria-label="Back to profiles">
+        <Link
+          href={subject === "math" ? `/learn/board?profile=${profileId}` : "/"}
+          className="text-2xl"
+          aria-label="Back"
+        >
           ←
         </Link>
         <div className="flex flex-col items-center">
           <span className="font-display text-lg font-semibold">
-            {meta.emoji} {meta.title}
+            {meta.emoji} {subject === "math" && skillTitle ? skillTitle : meta.title}
           </span>
-          {lastTurn && <LevelBar level={lastTurn.difficulty} streak={computeStreak(messages)} />}
+          {lastTurn && subject === "math" && (
+            <LevelBar level={lastTurn.difficulty} streak={computeStreak(messages)} />
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Mascot mood={mood} size={40} className="shrink-0" />
@@ -197,6 +251,18 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
         <div ref={scrollRef} />
       </div>
 
+      {subject === "math" && phase === "teach" && (
+        <div className="flex justify-center border-t-2 border-kip-purple/10 bg-white px-4 py-2">
+          <button
+            onClick={startPractice}
+            disabled={loading}
+            className="rounded-full bg-kip-purple px-8 py-2.5 font-display text-base font-semibold text-white shadow-md transition hover:brightness-105 disabled:opacity-40"
+          >
+            Ready — Start Practice →
+          </button>
+        </div>
+      )}
+
       <div className="sticky bottom-0 flex items-center gap-2 border-t-2 border-kip-purple/10 bg-white px-4 py-3">
         {speech.sttSupported && (
           <MicButton
@@ -215,7 +281,7 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submitAnswer(input)}
-          placeholder="Type your answer..."
+          placeholder={subject === "math" && phase === "teach" ? "Ask Kip a question..." : "Type your answer..."}
           disabled={loading}
           className="min-w-0 flex-1 rounded-full border-2 border-kip-purple/15 bg-kip-cream px-5 py-3 text-lg outline-none focus:border-kip-purple/50"
         />
