@@ -1,26 +1,69 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fff9ec;
+  --foreground: #2d2a4a;
+
+  --color-kip-purple: #6c5ce7;
+  --color-kip-purple-dark: #5a4bd1;
+  --color-kip-teal: #00c2a8;
+  --color-kip-yellow: #ffc93c;
+  --color-kip-orange: #ff8a5c;
+  --color-kip-pink: #ff6f91;
+  --color-kip-green: #4cd97b;
+  --color-kip-red: #ff5c5c;
+  --color-kip-cream: #fff9ec;
+  --color-kip-ink: #2d2a4a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-kip-purple: var(--color-kip-purple);
+  --color-kip-purple-dark: var(--color-kip-purple-dark);
+  --color-kip-teal: var(--color-kip-teal);
+  --color-kip-yellow: var(--color-kip-yellow);
+  --color-kip-orange: var(--color-kip-orange);
+  --color-kip-pink: var(--color-kip-pink);
+  --color-kip-green: var(--color-kip-green);
+  --color-kip-red: var(--color-kip-red);
+  --color-kip-cream: var(--color-kip-cream);
+  --color-kip-ink: var(--color-kip-ink);
+  --font-display: var(--font-fredoka);
+  --font-sans: var(--font-baloo);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-baloo), "Comic Sans MS", ui-rounded, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-fredoka), var(--font-baloo), sans-serif;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+.animate-float {
+  animation: float 3.5s ease-in-out infinite;
+}
+
+@keyframes pop-in {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.animate-pop-in {
+  animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-kip-purple) 40%, white);
+  border-radius: 999px;
 }

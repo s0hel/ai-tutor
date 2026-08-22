@@ -1,0 +1,14 @@
+{
+  "name": "Kip's Learning Club",
+  "short_name": "Kip's Club",
+  "description": "A friendly AI tutor for math and reading practice.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff9ec",
+  "theme_color": "#6c5ce7",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
