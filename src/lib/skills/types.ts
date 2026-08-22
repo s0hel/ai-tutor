@@ -1,10 +1,8 @@
-export type Strand = "multiplication" | "division" | "fractions" | "decimals" | "measurement-geometry";
+import type { ConceptBrief } from "../types";
 
-export interface ConceptBrief {
-  summary: string;
-  workedExamples: string[];
-  commonMisconceptions: string[];
-}
+export type { ConceptBrief };
+
+export type Strand = "multiplication" | "division" | "fractions" | "decimals" | "measurement-geometry";
 
 export interface Skill {
   slug: string;

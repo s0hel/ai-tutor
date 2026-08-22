@@ -9,6 +9,8 @@ import {
 } from "@/lib/repo";
 import { getSkillBoard } from "@/lib/skillBoard";
 import { STRAND_META } from "@/lib/skills";
+import { getGTBoard } from "@/lib/gifted/gtBoard";
+import { BATTERY_META } from "@/lib/gifted";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -23,7 +25,7 @@ export async function GET(req: NextRequest) {
   const badges = await listBadges(profileId);
   const dailyStreak = await currentDailyStreak(profileId);
 
-  const bySubject = (subject: "math" | "reading") => {
+  const bySubject = (subject: "math" | "reading" | "gifted") => {
     const subjectAttempts = attempts.filter((a) => a.subject === subject && a.correct !== null);
     const correct = subjectAttempts.filter((a) => a.correct === 1).length;
     const total = subjectAttempts.length;
@@ -41,7 +43,9 @@ export async function GET(req: NextRequest) {
     badges,
     math: { ...bySubject("math"), board: await getSkillBoard(profileId) },
     reading: bySubject("reading"),
+    gifted: { ...bySubject("gifted"), board: await getGTBoard(profileId) },
     recentAttempts: attempts.slice(0, 30),
     strandMeta: STRAND_META,
+    batteryMeta: BATTERY_META,
   });
 }

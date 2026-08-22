@@ -1,4 +1,18 @@
-export type Subject = "math" | "reading";
+export type Subject = "math" | "reading" | "gifted";
+
+export interface ConceptBrief {
+  summary: string;
+  workedExamples: string[];
+  commonMisconceptions: string[];
+}
+
+/** Minimal shape shared by math's `Skill` and gifted's `GTSkill` — enough for teach/practice/mastery to work generically across subjects. */
+export interface TutorableSkill {
+  slug: string;
+  subject: Subject;
+  title: string;
+  conceptBrief: ConceptBrief;
+}
 
 export interface Profile {
   id: number;
@@ -88,6 +102,7 @@ export const BADGES: Record<string, { label: string; description: string }> = {
   streak_10: { label: "Superstar", description: "10 correct answers in a row" },
   math_explorer: { label: "Math Explorer", description: "Tried 5 different math topics" },
   reading_explorer: { label: "Bookworm", description: "Tried 5 different reading topics" },
+  gifted_explorer: { label: "Brain Booster", description: "Tried 5 different Brain Games puzzle types" },
   level_up: { label: "Level Up!", description: "Reached a new difficulty level" },
   daily_streak_3: { label: "3-Day Streak", description: "Practiced 3 days in a row" },
   daily_streak_7: { label: "Weekly Champ", description: "Practiced 7 days in a row" },

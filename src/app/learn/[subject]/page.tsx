@@ -11,13 +11,32 @@ import LevelBar from "@/components/LevelBar";
 import BadgeToast from "@/components/BadgeToast";
 import Confetti from "@/components/Confetti";
 import KhanVideo from "@/components/KhanVideo";
+import VisualPrompt from "@/components/gifted/VisualPrompt";
+import ChoiceGrid from "@/components/gifted/ChoiceGrid";
 import { useSpeech } from "@/hooks/useSpeech";
 import type { ChatMessage, Profile, Subject, TutorTurn } from "@/lib/types";
+import type { ChoiceOption, VisualSpec } from "@/lib/gifted/visualTypes";
 
 const SUBJECT_META: Record<Subject, { title: string; color: string; emoji: string }> = {
   math: { title: "Math Time", color: "bg-kip-teal", emoji: "🔢" },
   reading: { title: "Reading Time", color: "bg-kip-pink", emoji: "📚" },
+  gifted: { title: "Brain Games", color: "bg-kip-orange", emoji: "🧠" },
 };
+
+/** math and gifted both follow the fixed-skill teach→practice pattern (skillSlug required, board redirect, level/streak). Reading is freeform. */
+function isSkillSubject(subject: Subject): boolean {
+  return subject === "math" || subject === "gifted";
+}
+
+function boardPathFor(subject: Subject): string {
+  return subject === "gifted" ? "/learn/gt-board" : "/learn/board";
+}
+
+interface PresentedProblem {
+  answerType: "choice";
+  prompt: VisualSpec;
+  options: ChoiceOption[];
+}
 
 function computeStreak(messages: ChatMessage[]): number {
   let streak = 0;
@@ -46,7 +65,7 @@ export default function LearnPage({ params }: { params: Promise<{ subject: strin
 
 function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
   const { subject: rawSubject } = use(params);
-  const subject = (rawSubject === "reading" ? "reading" : "math") as Subject;
+  const subject = (rawSubject === "reading" ? "reading" : rawSubject === "gifted" ? "gifted" : "math") as Subject;
   const meta = SUBJECT_META[subject];
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -70,14 +89,17 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
   const [showConfetti, setShowConfetti] = useState(false);
   const [mood, setMood] = useState<MascotMood>("idle");
   const [phase, setPhase] = useState<"teach" | "practice" | "freeform">("freeform");
+  const [presentedProblem, setPresentedProblem] = useState<PresentedProblem | null>(null);
+  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const [selectedCorrect, setSelectedCorrect] = useState<boolean | null>(null);
 
   const initialized = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const speech = useSpeech();
 
   useEffect(() => {
-    if (subject === "math" && !skillSlug) {
-      router.replace(`/learn/board?profile=${profileId}`);
+    if (isSkillSubject(subject) && !skillSlug) {
+      router.replace(`${boardPathFor(subject)}?profile=${profileId}`);
     }
   }, [subject, skillSlug, profileId, router]);
 
@@ -90,36 +112,46 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
   }, [profileId]);
 
   useEffect(() => {
-    if (subject !== "math" || !skillSlug) return;
-    fetch("/api/skills")
-      .then((r) => r.json())
-      .then(
-        (data: {
-          strands: {
-            skills: {
-              slug: string;
-              title: string;
-              videoId?: string;
-              videoTitle?: string;
-              videoSource?: string;
-              videoSourceUrl?: string;
+    if (!isSkillSubject(subject) || !skillSlug) return;
+    if (subject === "math") {
+      fetch("/api/skills")
+        .then((r) => r.json())
+        .then(
+          (data: {
+            strands: {
+              skills: {
+                slug: string;
+                title: string;
+                videoId?: string;
+                videoTitle?: string;
+                videoSource?: string;
+                videoSourceUrl?: string;
+              }[];
             }[];
-          }[];
-        }) => {
-          const found = data.strands.flatMap((s) => s.skills).find((s) => s.slug === skillSlug);
+          }) => {
+            const found = data.strands.flatMap((s) => s.skills).find((s) => s.slug === skillSlug);
+            setSkillTitle(found?.title ?? null);
+            setSkillVideo(
+              found?.videoId
+                ? {
+                    videoId: found.videoId,
+                    title: found.videoTitle ?? found.title,
+                    source: found.videoSource,
+                    sourceUrl: found.videoSourceUrl,
+                  }
+                : null
+            );
+          }
+        );
+    } else {
+      fetch("/api/gt-skills")
+        .then((r) => r.json())
+        .then((data: { batteries: { skills: { slug: string; title: string }[] }[] }) => {
+          const found = data.batteries.flatMap((b) => b.skills).find((s) => s.slug === skillSlug);
           setSkillTitle(found?.title ?? null);
-          setSkillVideo(
-            found?.videoId
-              ? {
-                  videoId: found.videoId,
-                  title: found.videoTitle ?? found.title,
-                  source: found.videoSource,
-                  sourceUrl: found.videoSourceUrl,
-                }
-              : null
-          );
-        }
-      );
+          setSkillVideo(null);
+        });
+    }
   }, [subject, skillSlug]);
 
   const sendTurn = async (history: ChatMessage[], opts?: { startPractice?: boolean }) => {
@@ -134,7 +166,7 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
           profileId,
           subject,
           history,
-          skillSlug: subject === "math" ? skillSlug : undefined,
+          skillSlug: isSkillSubject(subject) ? skillSlug : undefined,
           startPractice: opts?.startPractice ?? false,
         }),
       });
@@ -147,6 +179,7 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
         phase: "teach" | "practice" | "freeform";
         badgesEarned: { key: string; label: string }[];
         masteredSkill?: string | null;
+        presentedProblem?: PresentedProblem;
       } = await res.json();
 
       setPhase(data.phase);
@@ -165,6 +198,17 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
         setMood("encouraging");
       } else {
         setMood("idle");
+      }
+
+      if (data.phase !== "practice") {
+        setPresentedProblem(null);
+      } else if (typeof lastTurnData.isCorrectAnswer === "boolean") {
+        setSelectedCorrect(lastTurnData.isCorrectAnswer);
+      }
+      if (data.presentedProblem) {
+        setPresentedProblem(data.presentedProblem);
+        setSelectedOptionId(null);
+        setSelectedCorrect(null);
       }
 
       if (data.masteredSkill) {
@@ -189,7 +233,7 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
   };
 
   useEffect(() => {
-    if (!profile || initialized.current || (subject === "math" && !skillSlug)) return;
+    if (!profile || initialized.current || (isSkillSubject(subject) && !skillSlug)) return;
     initialized.current = true;
     sendTurn([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -208,13 +252,20 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
     sendTurn(next);
   };
 
+  const selectChoice = (optionId: string) => {
+    if (loading) return;
+    setSelectedOptionId(optionId);
+    setSelectedCorrect(null);
+    submitAnswer(optionId);
+  };
+
   const startPractice = () => {
     sendTurn(messages, { startPractice: true });
   };
 
   const lastTurn = [...messages].reverse().find((m) => m.turn)?.turn;
 
-  if (!profile || (subject === "math" && !skillSlug)) {
+  if (!profile || (isSkillSubject(subject) && !skillSlug)) {
     return (
       <main className="flex flex-1 items-center justify-center">
         <Mascot mood="thinking" />
@@ -222,11 +273,13 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
     );
   }
 
+  const showChoiceUI = phase === "practice" && !!presentedProblem;
+
   return (
     <main className="flex min-h-dvh flex-1 flex-col bg-kip-cream">
       <header className={`flex items-center justify-between gap-3 px-4 py-3 text-white ${meta.color}`}>
         <Link
-          href={subject === "math" ? `/learn/board?profile=${profileId}` : "/"}
+          href={isSkillSubject(subject) ? `${boardPathFor(subject)}?profile=${profileId}` : "/"}
           className="text-2xl"
           aria-label="Back"
         >
@@ -234,11 +287,9 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
         </Link>
         <div className="flex flex-col items-center">
           <span className="font-display text-lg font-semibold">
-            {meta.emoji} {subject === "math" && skillTitle ? skillTitle : meta.title}
+            {meta.emoji} {isSkillSubject(subject) && skillTitle ? skillTitle : meta.title}
           </span>
-          {lastTurn && subject === "math" && (
-            <LevelBar level={lastTurn.difficulty} streak={computeStreak(messages)} />
-          )}
+          {lastTurn && isSkillSubject(subject) && <LevelBar level={lastTurn.difficulty} streak={computeStreak(messages)} />}
         </div>
         <div className="flex items-center gap-2">
           <Mascot mood={mood} size={40} className="shrink-0" />
@@ -287,10 +338,22 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
             </button>
           </div>
         )}
+        {showChoiceUI && (
+          <div className="flex flex-col items-center gap-4 self-center">
+            <VisualPrompt spec={presentedProblem.prompt} />
+            <ChoiceGrid
+              options={presentedProblem.options}
+              onSelect={selectChoice}
+              disabled={loading}
+              selectedId={selectedOptionId}
+              selectedCorrect={selectedCorrect}
+            />
+          </div>
+        )}
         <div ref={scrollRef} />
       </div>
 
-      {subject === "math" && phase === "teach" && (
+      {isSkillSubject(subject) && phase === "teach" && (
         <div className="flex justify-center border-t-2 border-kip-purple/10 bg-white px-4 py-2">
           <button
             onClick={startPractice}
@@ -302,36 +365,38 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
         </div>
       )}
 
-      <div className="sticky bottom-0 flex items-center gap-2 border-t-2 border-kip-purple/10 bg-white px-4 py-3">
-        {speech.sttSupported && (
-          <MicButton
-            isListening={speech.isListening}
+      {!showChoiceUI && (
+        <div className="sticky bottom-0 flex items-center gap-2 border-t-2 border-kip-purple/10 bg-white px-4 py-3">
+          {speech.sttSupported && (
+            <MicButton
+              isListening={speech.isListening}
+              disabled={loading}
+              onClick={() => {
+                if (speech.isListening) {
+                  speech.stopListening();
+                } else {
+                  speech.startListening((text) => submitAnswer(text));
+                }
+              }}
+            />
+          )}
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && submitAnswer(input)}
+            placeholder={isSkillSubject(subject) && phase === "teach" ? "Ask Kip a question..." : "Type your answer..."}
             disabled={loading}
-            onClick={() => {
-              if (speech.isListening) {
-                speech.stopListening();
-              } else {
-                speech.startListening((text) => submitAnswer(text));
-              }
-            }}
+            className="min-w-0 flex-1 rounded-full border-2 border-kip-purple/15 bg-kip-cream px-5 py-3 text-lg outline-none focus:border-kip-purple/50"
           />
-        )}
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && submitAnswer(input)}
-          placeholder={subject === "math" && phase === "teach" ? "Ask Kip a question..." : "Type your answer..."}
-          disabled={loading}
-          className="min-w-0 flex-1 rounded-full border-2 border-kip-purple/15 bg-kip-cream px-5 py-3 text-lg outline-none focus:border-kip-purple/50"
-        />
-        <button
-          onClick={() => submitAnswer(input)}
-          disabled={loading || !input.trim()}
-          className="shrink-0 rounded-full bg-kip-purple px-6 py-3 font-display font-semibold text-white shadow-md disabled:opacity-40"
-        >
-          Send
-        </button>
-      </div>
+          <button
+            onClick={() => submitAnswer(input)}
+            disabled={loading || !input.trim()}
+            className="shrink-0 rounded-full bg-kip-purple px-6 py-3 font-display font-semibold text-white shadow-md disabled:opacity-40"
+          >
+            Send
+          </button>
+        </div>
+      )}
 
       <AnimatePresence>{showConfetti && <Confetti key={confettiKey} />}</AnimatePresence>
       <BadgeToast label={badgeToast} />

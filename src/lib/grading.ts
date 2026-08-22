@@ -60,5 +60,8 @@ export function gradeAnswer(raw: string, expected: CanonicalAnswer): { correct: 
       );
       return { correct: candidates.includes(normalized) };
     }
+    case "choice": {
+      return { correct: raw.trim() === expected.value };
+    }
   }
 }

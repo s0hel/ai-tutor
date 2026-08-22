@@ -26,6 +26,14 @@ import { perimeterRectangle } from "./measurementGeometry/perimeterRectangle";
 import { classifyShape } from "./measurementGeometry/classifyShape";
 import { classifyAngle } from "./measurementGeometry/classifyAngle";
 import { unitConversion } from "./measurementGeometry/unitConversion";
+import { pictureAnalogies } from "./gifted/pictureAnalogies";
+import { sentenceCompletion } from "./gifted/sentenceCompletion";
+import { pictureClassification } from "./gifted/pictureClassification";
+import { numberAnalogies } from "./gifted/numberAnalogies";
+import { numberPuzzles } from "./gifted/numberPuzzles";
+import { numberSeries } from "./gifted/numberSeries";
+import { figureMatrices } from "./gifted/figureMatrices";
+import { figureClassification } from "./gifted/figureClassification";
 
 const GENERATORS: Record<string, ProblemGenerator> = {
   "mult-2digit-1digit": mult2x1,
@@ -55,6 +63,14 @@ const GENERATORS: Record<string, ProblemGenerator> = {
   "geo-classify-shape": classifyShape,
   "geo-classify-angle": classifyAngle,
   "geo-unit-conversion": unitConversion,
+  "gt-picture-analogies": pictureAnalogies,
+  "gt-sentence-completion": sentenceCompletion,
+  "gt-picture-classification": pictureClassification,
+  "gt-number-analogies": numberAnalogies,
+  "gt-number-puzzles": numberPuzzles,
+  "gt-number-series": numberSeries,
+  "gt-figure-matrices": figureMatrices,
+  "gt-figure-classification": figureClassification,
 };
 
 export function getGenerator(generatorId: string): ProblemGenerator {

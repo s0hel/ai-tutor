@@ -5,7 +5,9 @@ import Link from "next/link";
 import AvatarIcon from "@/components/AvatarIcon";
 import { AVATARS, BADGES, type Attempt, type Badge, type ParentInvite, type Profile, type SkillState } from "@/lib/types";
 import type { SkillBoardEntry } from "@/components/SkillBoard";
+import type { GTBoardEntry } from "@/components/GTBoard";
 import type { Strand } from "@/lib/skills";
+import type { Battery } from "@/lib/gifted";
 
 interface StatsResponse {
   profile: Profile;
@@ -19,8 +21,16 @@ interface StatsResponse {
     board: SkillBoardEntry[];
   };
   reading: { total: number; correct: number; accuracy: number | null; topics: SkillState[] };
+  gifted: {
+    total: number;
+    correct: number;
+    accuracy: number | null;
+    topics: SkillState[];
+    board: GTBoardEntry[];
+  };
   recentAttempts: Attempt[];
   strandMeta: Record<Strand, { label: string; emoji: string; order: number }>;
+  batteryMeta: Record<Battery, { label: string; emoji: string; order: number }>;
 }
 
 function InviteCoParent() {
@@ -220,6 +230,38 @@ function ProfileStats({ profile }: { profile: Profile }) {
     );
   };
 
+  const giftedBoardCard = () => {
+    const batteries = Array.from(new Set(stats.gifted.board.map((e) => e.skill.battery))).sort(
+      (a, b) => stats.batteryMeta[a].order - stats.batteryMeta[b].order
+    );
+    return (
+      <div className="rounded-2xl bg-white p-4 shadow-sm">
+        <h4 className="font-display font-semibold text-kip-ink">🧠 Brain Games</h4>
+        <p className="mt-1 text-sm text-kip-ink/60">
+          {stats.gifted.total} questions answered
+          {stats.gifted.accuracy !== null && ` · ${stats.gifted.accuracy}% correct`}
+        </p>
+        <ul className="mt-2 space-y-1.5 text-sm">
+          {batteries.map((battery) => {
+            const entries = stats.gifted.board.filter((e) => e.skill.battery === battery);
+            const mastered = entries.filter((e) => e.status === "mastered").length;
+            const practicing = entries.filter((e) => e.status === "practicing").length;
+            return (
+              <li key={battery} className="flex justify-between text-kip-ink/70">
+                <span>
+                  {stats.batteryMeta[battery].emoji} {stats.batteryMeta[battery].label}
+                </span>
+                <span>
+                  {mastered}/{entries.length} mastered{practicing > 0 && ` · ${practicing} practicing`}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  };
+
   return (
     <div className="mt-4 space-y-4">
       <div className="flex flex-wrap gap-3">
@@ -236,6 +278,7 @@ function ProfileStats({ profile }: { profile: Profile }) {
       <div className="grid gap-4 sm:grid-cols-2">
         {mathBoardCard()}
         {subjectCard("📚 Reading", stats.reading)}
+        {giftedBoardCard()}
       </div>
 
       <div className="rounded-2xl bg-white p-4 shadow-sm">

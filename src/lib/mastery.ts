@@ -1,6 +1,5 @@
 import { attemptStatsForTopic, skillPracticeDayCount } from "./repo";
-import type { Skill } from "./skills";
-import type { SkillState, SkillStatus } from "./types";
+import type { SkillState, SkillStatus, TutorableSkill } from "./types";
 
 const MASTERY = {
   minStreak: 5,
@@ -11,7 +10,7 @@ const MASTERY = {
 
 export async function evaluateMastery(
   profileId: number,
-  skill: Skill,
+  skill: TutorableSkill,
   state: SkillState
 ): Promise<{ status: SkillStatus; masteredAt: string | null }> {
   if (state.status === "mastered") {

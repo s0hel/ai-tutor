@@ -35,9 +35,15 @@ export async function evaluateBadges(
     streak_10: "Superstar",
     math_explorer: "Math Explorer",
     reading_explorer: "Bookworm",
+    gifted_explorer: "Brain Booster",
     level_up: "Level Up!",
     daily_streak_3: "3-Day Streak",
     daily_streak_7: "Weekly Champ",
+  };
+  const EXPLORER_BADGE: Record<Subject, string> = {
+    math: "math_explorer",
+    reading: "reading_explorer",
+    gifted: "gifted_explorer",
   };
 
   const tryAward = async (key: string) => {
@@ -51,7 +57,7 @@ export async function evaluateBadges(
 
   const topics = await distinctTopics(profileId, subject);
   if (topics.length >= 5) {
-    await tryAward(subject === "math" ? "math_explorer" : "reading_explorer");
+    await tryAward(EXPLORER_BADGE[subject]);
   }
 
   await recordPracticeDay(profileId);

@@ -97,6 +97,12 @@ export default function HomePage() {
                 >
                   📚 Reading
                 </Link>
+                <Link
+                  href={`/learn/gt-board?profile=${active.id}`}
+                  className="rounded-2xl bg-kip-orange px-6 py-4 font-display text-xl font-semibold text-white shadow-md transition hover:brightness-105"
+                >
+                  🧠 Brain Games
+                </Link>
               </div>
               <button
                 onClick={() => setActive(null)}
