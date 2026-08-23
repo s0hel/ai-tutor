@@ -4,10 +4,13 @@ export const VOCABULARY_SKILLS: ReadingSkill[] = [
   {
     slug: "vocab-context-clues",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "vocabulary",
     title: "Using context clues",
     order: 1,
     generatorId: "vocab-context-clues",
+    videoId: "CiNggzdWkIo",
+    videoTitle: "Using context clues to figure out new words | Reading | Khan Academy",
     conceptBrief: {
       summary:
         "When you hit a word you don't know, look at the words and sentences around it — the 'context' — for hints about what it means. Sometimes the sentence even gives an example or explains the word directly.",
@@ -24,6 +27,7 @@ export const VOCABULARY_SKILLS: ReadingSkill[] = [
   {
     slug: "vocab-synonyms",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "vocabulary",
     title: "Finding synonyms",
     order: 2,
@@ -40,6 +44,7 @@ export const VOCABULARY_SKILLS: ReadingSkill[] = [
   {
     slug: "vocab-antonyms",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "vocabulary",
     title: "Finding antonyms",
     order: 3,
@@ -56,10 +61,13 @@ export const VOCABULARY_SKILLS: ReadingSkill[] = [
   {
     slug: "vocab-prefixes-suffixes",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "vocabulary",
     title: "Prefixes and suffixes",
     order: 4,
     generatorId: "vocab-prefixes-suffixes",
+    videoId: "NcrsPIv6NdI",
+    videoTitle: "Using word parts to determine meaning | Reading | 5th Grade | Khan Academy",
     conceptBrief: {
       summary:
         "A prefix is added to the front of a word and a suffix to the end — each changes the word's meaning in a predictable way. Knowing common ones (un-, re-, pre-, -ful, -less, -able) helps you figure out unfamiliar words.",

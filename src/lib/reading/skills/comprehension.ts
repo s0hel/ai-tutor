@@ -4,10 +4,13 @@ export const COMPREHENSION_SKILLS: ReadingSkill[] = [
   {
     slug: "comp-main-idea",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "comprehension",
     title: "Finding the main idea",
     order: 1,
     generatorId: "comp-main-idea",
+    videoId: "4swFGRhQoMI",
+    videoTitle: "What is a main idea? | Reading | Khan Academy",
     conceptBrief: {
       summary:
         "The main idea is what a passage is mostly about — the big point the author is making. It's usually broader than any single detail, but not so broad that it could describe a totally different passage.",
@@ -24,10 +27,13 @@ export const COMPREHENSION_SKILLS: ReadingSkill[] = [
   {
     slug: "comp-supporting-details",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "comprehension",
     title: "Identifying supporting details",
     order: 2,
     generatorId: "comp-supporting-details",
+    videoId: "lGJw0QS1Y9w",
+    videoTitle: "Supporting a main idea with key details | Reading | Khan Academy",
     conceptBrief: {
       summary:
         "Supporting details are the specific facts, examples, or pieces of evidence in a passage that back up its main idea. Finding the right detail means going back to what the passage actually said, not what you assume.",
@@ -43,6 +49,7 @@ export const COMPREHENSION_SKILLS: ReadingSkill[] = [
   {
     slug: "comp-sequence",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "comprehension",
     title: "Sequencing events",
     order: 3,
@@ -62,10 +69,13 @@ export const COMPREHENSION_SKILLS: ReadingSkill[] = [
   {
     slug: "comp-summarize",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "comprehension",
     title: "Summarizing a passage",
     order: 4,
     generatorId: "comp-summarize",
+    videoId: "SmnR4AZ-XM8",
+    videoTitle: "Summarizing stories | Reading | Khan Academy",
     conceptBrief: {
       summary:
         "A good summary captures the most important points of a passage in far fewer words, without adding opinions or leaving out anything essential. It's different from just repeating one small detail.",

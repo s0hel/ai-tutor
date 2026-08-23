@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getReadingBoard } from "@/lib/reading/readingBoard";
-import { READING_STRAND_META } from "@/lib/reading";
+import { READING_STRAND_META, GRADE_BAND_META, defaultGradeBandForAge, type GradeBand } from "@/lib/reading";
 import { getProfileForFamily } from "@/lib/repo";
 
 export async function GET(req: NextRequest) {
@@ -12,5 +12,14 @@ export async function GET(req: NextRequest) {
   const profile = await getProfileForFamily(profileId, session.user.familyId);
   if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
 
-  return NextResponse.json({ board: await getReadingBoard(profileId), strandMeta: READING_STRAND_META });
+  const requestedGradeBand = req.nextUrl.searchParams.get("gradeBand") as GradeBand | null;
+  const gradeBand: GradeBand =
+    requestedGradeBand && GRADE_BAND_META[requestedGradeBand] ? requestedGradeBand : defaultGradeBandForAge(profile.age);
+
+  return NextResponse.json({
+    board: await getReadingBoard(profileId, gradeBand),
+    strandMeta: READING_STRAND_META,
+    gradeBand,
+    gradeBandMeta: GRADE_BAND_META,
+  });
 }

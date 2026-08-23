@@ -4,6 +4,7 @@ export const INFERENCE_ANALYSIS_SKILLS: ReadingSkill[] = [
   {
     slug: "inf-draw-conclusions",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "inference-analysis",
     title: "Drawing conclusions",
     order: 1,
@@ -23,10 +24,13 @@ export const INFERENCE_ANALYSIS_SKILLS: ReadingSkill[] = [
   {
     slug: "inf-cause-effect",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "inference-analysis",
     title: "Cause and effect",
     order: 2,
     generatorId: "inf-cause-effect",
+    videoId: "TiORG0pHskE",
+    videoTitle: "What language shows cause and effect? | Reading | Khan Academy",
     conceptBrief: {
       summary:
         "A cause is why something happens; an effect is what happens as a result. Passages often signal these with words like because, so, as a result, and therefore.",
@@ -42,10 +46,13 @@ export const INFERENCE_ANALYSIS_SKILLS: ReadingSkill[] = [
   {
     slug: "inf-compare-contrast",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "inference-analysis",
     title: "Comparing and contrasting",
     order: 3,
     generatorId: "inf-compare-contrast",
+    videoId: "JdGA0Fexab8",
+    videoTitle: "Comparing two accounts of the same topic | Reading | Khan Academy",
     conceptBrief: {
       summary:
         "Comparing looks at how two things are alike; contrasting looks at how they're different. Passages often use words like both, similarly, but, however, and while to signal these relationships.",
@@ -61,6 +68,7 @@ export const INFERENCE_ANALYSIS_SKILLS: ReadingSkill[] = [
   {
     slug: "inf-predict",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "inference-analysis",
     title: "Making predictions",
     order: 4,

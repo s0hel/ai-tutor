@@ -1,4 +1,4 @@
-import { READING_SKILLS, type ReadingSkill } from "./index";
+import { READING_SKILLS, type GradeBand, type ReadingSkill } from "./index";
 import { listSkillStates } from "../repo";
 import type { SkillStatus } from "../types";
 
@@ -9,11 +9,14 @@ export interface ReadingBoardEntry {
   recommended: boolean;
 }
 
-export async function getReadingBoard(profileId: number): Promise<ReadingBoardEntry[]> {
+/** Pass a gradeBand to scope the board (and its "recommended next" pick) to just that grade's skills — omit it for a full, ungrouped overview (used by the parent dashboard). */
+export async function getReadingBoard(profileId: number, gradeBand?: GradeBand): Promise<ReadingBoardEntry[]> {
   const states = await listSkillStates(profileId, "reading");
   const stateByTopic = new Map(states.map((s) => [s.topic, s]));
 
-  const entries: ReadingBoardEntry[] = READING_SKILLS.map((skill) => {
+  const skillsInScope = gradeBand ? READING_SKILLS.filter((s) => s.gradeBand === gradeBand) : READING_SKILLS;
+
+  const entries: ReadingBoardEntry[] = skillsInScope.map((skill) => {
     const state = stateByTopic.get(skill.slug);
     return {
       skill,

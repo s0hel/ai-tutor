@@ -189,8 +189,8 @@ function ProfileStats({ profile }: { profile: Profile }) {
   if (!stats) return <p className="mt-4 text-sm text-kip-ink/50">Loading...</p>;
 
   const readingBoardCard = () => {
-    const strands = Array.from(new Set(stats.reading.board.map((e) => e.skill.strand))).sort(
-      (a, b) => stats.readingStrandMeta[a].order - stats.readingStrandMeta[b].order
+    const gradeBands = Array.from(new Set(stats.reading.board.map((e) => e.skill.gradeBand))).sort(
+      (a, b) => GRADE_BAND_META[a].order - GRADE_BAND_META[b].order
     );
     return (
       <div className="rounded-2xl bg-white p-4 shadow-sm">
@@ -199,23 +199,36 @@ function ProfileStats({ profile }: { profile: Profile }) {
           {stats.reading.total} questions answered
           {stats.reading.accuracy !== null && ` · ${stats.reading.accuracy}% correct`}
         </p>
-        <ul className="mt-2 space-y-1.5 text-sm">
-          {strands.map((strand) => {
-            const entries = stats.reading.board.filter((e) => e.skill.strand === strand);
-            const mastered = entries.filter((e) => e.status === "mastered").length;
-            const practicing = entries.filter((e) => e.status === "practicing").length;
-            return (
-              <li key={strand} className="flex justify-between text-kip-ink/70">
-                <span>
-                  {stats.readingStrandMeta[strand].emoji} {stats.readingStrandMeta[strand].label}
-                </span>
-                <span>
-                  {mastered}/{entries.length} mastered{practicing > 0 && ` · ${practicing} practicing`}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+        {gradeBands.map((band) => {
+          const bandEntries = stats.reading.board.filter((e) => e.skill.gradeBand === band);
+          const strands = Array.from(new Set(bandEntries.map((e) => e.skill.strand))).sort(
+            (a, b) => stats.readingStrandMeta[a].order - stats.readingStrandMeta[b].order
+          );
+          return (
+            <div key={band} className="mt-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-kip-ink/40">
+                {GRADE_BAND_META[band].label}
+              </p>
+              <ul className="mt-1 space-y-1.5 text-sm">
+                {strands.map((strand) => {
+                  const entries = bandEntries.filter((e) => e.skill.strand === strand);
+                  const mastered = entries.filter((e) => e.status === "mastered").length;
+                  const practicing = entries.filter((e) => e.status === "practicing").length;
+                  return (
+                    <li key={strand} className="flex justify-between text-kip-ink/70">
+                      <span>
+                        {stats.readingStrandMeta[strand].emoji} {stats.readingStrandMeta[strand].label}
+                      </span>
+                      <span>
+                        {mastered}/{entries.length} mastered{practicing > 0 && ` · ${practicing} practicing`}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })}
       </div>
     );
   };

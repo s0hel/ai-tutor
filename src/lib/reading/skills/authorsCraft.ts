@@ -4,10 +4,13 @@ export const AUTHORS_CRAFT_SKILLS: ReadingSkill[] = [
   {
     slug: "craft-authors-purpose",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "authors-craft",
     title: "Author's purpose",
     order: 1,
     generatorId: "craft-authors-purpose",
+    videoId: "R_bgo8j6jxc",
+    videoTitle: "Analyzing an author's purpose | Reading | Khan Academy",
     conceptBrief: {
       summary:
         "Authors write for different reasons: to persuade (convince you of something), to inform (teach you facts), or to entertain (tell an enjoyable story). Look at the content and tone to figure out which one fits.",
@@ -25,10 +28,13 @@ export const AUTHORS_CRAFT_SKILLS: ReadingSkill[] = [
   {
     slug: "craft-point-of-view",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "authors-craft",
     title: "Point of view",
     order: 2,
     generatorId: "craft-point-of-view",
+    videoId: "GGS3NcmAZnw",
+    videoTitle: "A story's point of view | Reading | Khan Academy",
     conceptBrief: {
       summary:
         "Point of view is who's telling the story. First-person uses 'I' and 'we' — the narrator is a character in the story. Third-person uses 'he,' 'she,' or names — the narrator is outside the story looking in.",
@@ -45,10 +51,13 @@ export const AUTHORS_CRAFT_SKILLS: ReadingSkill[] = [
   {
     slug: "craft-figurative-language",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "authors-craft",
     title: "Figurative language",
     order: 3,
     generatorId: "craft-figurative-language",
+    videoId: "lzKj-bLvrYQ",
+    videoTitle: "Figurative language | Reading | Khan Academy",
     conceptBrief: {
       summary:
         "Figurative language doesn't mean exactly what it says word-for-word. A simile compares two things using 'like' or 'as' (brave as a lion). A metaphor says one thing IS another (time is money). An idiom is a phrase with a meaning different from its literal words (it's raining cats and dogs).",
@@ -66,10 +75,13 @@ export const AUTHORS_CRAFT_SKILLS: ReadingSkill[] = [
   {
     slug: "craft-text-structure",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "authors-craft",
     title: "Text structure",
     order: 4,
     generatorId: "craft-text-structure",
+    videoId: "D0YUpfLofgQ",
+    videoTitle: "The structures of informational texts | Reading | 5th Grade | Khan Academy",
     conceptBrief: {
       summary:
         "Authors organize information in different patterns: chronological (events in time order), compare-contrast (how things are alike/different), cause-effect (why something happened), and problem-solution (a problem and how it's fixed).",

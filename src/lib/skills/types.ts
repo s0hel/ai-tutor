@@ -2,7 +2,7 @@ import type { ConceptBrief } from "../types";
 
 export type { ConceptBrief };
 
-export type GradeBand = "grade1" | "grade4-5";
+export type GradeBand = "grade1" | "grade2" | "grade3" | "grade4-5";
 
 export type Strand =
   // grade4-5
@@ -16,7 +16,19 @@ export type Strand =
   | "addition-subtraction"
   | "place-value"
   | "shapes-geometry"
-  | "measurement-data";
+  | "measurement-data"
+  // grade2
+  | "addition-subtraction-2"
+  | "place-value-2"
+  | "measurement-data-2"
+  | "geometry-2"
+  | "early-multiplication-2"
+  // grade3
+  | "multiplication-3"
+  | "division-3"
+  | "fractions-3"
+  | "measurement-3"
+  | "data-geometry-3";
 
 export interface Skill {
   slug: string;

@@ -148,11 +148,33 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
     } else if (subject === "reading") {
       fetch("/api/reading-skills")
         .then((r) => r.json())
-        .then((data: { strands: { skills: { slug: string; title: string }[] }[] }) => {
-          const found = data.strands.flatMap((s) => s.skills).find((s) => s.slug === skillSlug);
-          setSkillTitle(found?.title ?? null);
-          setSkillVideo(null);
-        });
+        .then(
+          (data: {
+            strands: {
+              skills: {
+                slug: string;
+                title: string;
+                videoId?: string;
+                videoTitle?: string;
+                videoSource?: string;
+                videoSourceUrl?: string;
+              }[];
+            }[];
+          }) => {
+            const found = data.strands.flatMap((s) => s.skills).find((s) => s.slug === skillSlug);
+            setSkillTitle(found?.title ?? null);
+            setSkillVideo(
+              found?.videoId
+                ? {
+                    videoId: found.videoId,
+                    title: found.videoTitle ?? found.title,
+                    source: found.videoSource,
+                    sourceUrl: found.videoSourceUrl,
+                  }
+                : null
+            );
+          }
+        );
     } else {
       fetch("/api/gt-skills")
         .then((r) => r.json())

@@ -4,6 +4,7 @@ export const FACT_OPINION_GENRE_SKILLS: ReadingSkill[] = [
   {
     slug: "fact-opinion",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "fact-opinion-genre",
     title: "Fact vs. opinion",
     order: 1,
@@ -24,10 +25,13 @@ export const FACT_OPINION_GENRE_SKILLS: ReadingSkill[] = [
   {
     slug: "fact-text-evidence",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "fact-opinion-genre",
     title: "Finding text evidence",
     order: 2,
     generatorId: "fact-text-evidence",
+    videoId: "GO97JDR3C7Q",
+    videoTitle: "Citing evidence in literary text | Reading | Khan Academy",
     conceptBrief: {
       summary:
         "Text evidence is a specific sentence or detail from the passage that backs up a claim. Finding good evidence means going back to the passage and picking a sentence that directly supports the claim, not just one that's related to the topic.",
@@ -43,10 +47,13 @@ export const FACT_OPINION_GENRE_SKILLS: ReadingSkill[] = [
   {
     slug: "fact-genre",
     subject: "reading",
+    gradeBand: "grade4-5",
     strand: "fact-opinion-genre",
     title: "Fiction vs. nonfiction",
     order: 3,
     generatorId: "fact-genre",
+    videoId: "YxXfltZZOdI",
+    videoTitle: "Reading within and across genres | Reading | Khan Academy",
     conceptBrief: {
       summary:
         "Nonfiction is about real people, places, events, or facts. Fiction is made up, even if it feels realistic — look for clues like invented characters, talking animals, or impossible events versus real facts, dates, and information.",
