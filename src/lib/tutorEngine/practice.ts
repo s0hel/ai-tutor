@@ -1,6 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import type { ActivityType, Profile, TutorableSkill } from "../types";
 import type { AnswerType, GeneratedProblem } from "../problemGenerators/types";
+import { sanitizeLlmText } from "../llmSecurity";
 import { getClient, HAIKU_MODEL } from "./client";
 import { subjectSkillLabel } from "./subjectLabel";
 
@@ -138,8 +139,9 @@ export async function presentFeedback(params: {
 }): Promise<{ spokenText: string; displayText: string; activityType: ActivityType }> {
   const { profile, skill, kidRawAnswer, correct, attemptCount, hint, explanation, isFinalReveal } = params;
 
+  const safeKidAnswer = sanitizeLlmText(kidRawAnswer);
   const groundTruth = [
-    `The kid answered: "${kidRawAnswer}" (attempt #${attemptCount}).`,
+    `The kid answered: "${safeKidAnswer}" (attempt #${attemptCount}).`,
     `Ground truth: this answer is ${correct ? "CORRECT" : "INCORRECT"}.`,
     hint ? `Use this pre-written hint, phrased warmly, without giving away the final answer: "${hint}"` : "",
     explanation

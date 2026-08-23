@@ -1,5 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import type { ChatMessage, Profile, TutorableSkill, TutorTurn } from "../types";
+import { sanitizeHistoryForModel } from "../llmSecurity";
 import { getClient, MODEL } from "./client";
 import { subjectSkillLabel } from "./subjectLabel";
 
@@ -87,7 +88,8 @@ export async function callTeachTurn(
     },
   ];
 
-  const messages: Anthropic.MessageParam[] = history.map((m) => ({
+  const safeHistory = sanitizeHistoryForModel(history);
+  const messages: Anthropic.MessageParam[] = safeHistory.map((m) => ({
     role: m.role === "kid" ? "user" : "assistant",
     content: m.text,
   }));

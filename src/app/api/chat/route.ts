@@ -17,6 +17,7 @@ import type { ChoiceOption, VisualSpec } from "@/lib/gifted/visualTypes";
 import { getGenerator } from "@/lib/problemGenerators/registry";
 import { gradeAnswer } from "@/lib/grading";
 import { evaluateMastery } from "@/lib/mastery";
+import { validateRequestSize } from "@/lib/llmSecurity";
 import {
   clearPendingProblem,
   getPendingProblem,
@@ -192,6 +193,7 @@ export async function POST(req: NextRequest) {
   if (!session?.user) return NextResponse.json({ error: "Sign-in required" }, { status: 401 });
 
   const body = await req.json();
+  validateRequestSize(body);
   const profileId = Number(body.profileId);
   const subject = body.subject as Subject;
   const history = (body.history ?? []) as ChatMessage[];

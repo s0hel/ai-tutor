@@ -19,7 +19,9 @@ export const config = {
     "/parent/:path*",
     "/api/parent/:path*",
     "/api/profiles/:path*",
+    "/api/skills/:path*",
+    "/api/reading-skills/:path*",
+    "/api/gt-skills/:path*",
     "/api/chat",
-    "/api/skills/board",
   ],
 };
