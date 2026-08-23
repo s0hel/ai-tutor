@@ -6,7 +6,7 @@ import Link from "next/link";
 import Mascot from "@/components/Mascot";
 import SkillBoard, { type SkillBoardEntry } from "@/components/SkillBoard";
 import type { Profile } from "@/lib/types";
-import type { Strand } from "@/lib/skills";
+import { GRADE_BAND_META, defaultGradeBandForAge, type GradeBand, type Strand } from "@/lib/skills";
 
 export default function BoardPage() {
   return (
@@ -31,6 +31,7 @@ function BoardPageInner() {
   const [strandMeta, setStrandMeta] = useState<Record<Strand, { label: string; emoji: string; order: number }> | null>(
     null
   );
+  const [gradeBand, setGradeBand] = useState<GradeBand | null>(null);
 
   useEffect(() => {
     fetch("/api/profiles")
@@ -38,23 +39,29 @@ function BoardPageInner() {
       .then((data: { profiles: Profile[] }) => setProfile(data.profiles.find((p) => p.id === profileId) ?? null));
   }, [profileId]);
 
+  const resolvedGradeBand = gradeBand ?? (profile ? defaultGradeBandForAge(profile.age) : null);
+
   useEffect(() => {
-    if (!profileId) return;
-    fetch(`/api/skills/board?profileId=${profileId}`)
+    if (!profileId || !resolvedGradeBand) return;
+    fetch(`/api/skills/board?profileId=${profileId}&gradeBand=${resolvedGradeBand}`)
       .then((r) => r.json())
       .then((data) => {
         setBoard(data.board);
         setStrandMeta(data.strandMeta);
       });
-  }, [profileId]);
+  }, [profileId, resolvedGradeBand]);
 
-  if (!profile || !board || !strandMeta) {
+  if (!profile || !board || !strandMeta || !resolvedGradeBand) {
     return (
       <main className="flex flex-1 items-center justify-center">
         <Mascot mood="thinking" />
       </main>
     );
   }
+
+  const gradeBands = (Object.keys(GRADE_BAND_META) as GradeBand[]).sort(
+    (a, b) => GRADE_BAND_META[a].order - GRADE_BAND_META[b].order
+  );
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-3xl flex-1 flex-col px-4 py-6">
@@ -65,6 +72,21 @@ function BoardPageInner() {
         <h1 className="font-display text-xl font-semibold text-kip-purple">🔢 Math Skills for {profile.name}</h1>
         <span className="w-6" />
       </header>
+
+      <div className="mb-5 flex justify-center gap-2">
+        {gradeBands.map((band) => (
+          <button
+            key={band}
+            onClick={() => setGradeBand(band)}
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold shadow-sm transition ${
+              band === resolvedGradeBand ? "bg-kip-purple text-white" : "bg-white text-kip-ink/60 hover:text-kip-ink"
+            }`}
+          >
+            {GRADE_BAND_META[band].label}
+          </button>
+        ))}
+      </div>
+
       <SkillBoard profileId={profileId} board={board} strandMeta={strandMeta} />
     </main>
   );

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getSkillBoard } from "@/lib/skillBoard";
-import { STRAND_META } from "@/lib/skills";
+import { STRAND_META, GRADE_BAND_META, defaultGradeBandForAge, type GradeBand } from "@/lib/skills";
 import { getProfileForFamily } from "@/lib/repo";
 
 export async function GET(req: NextRequest) {
@@ -12,5 +12,14 @@ export async function GET(req: NextRequest) {
   const profile = await getProfileForFamily(profileId, session.user.familyId);
   if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
 
-  return NextResponse.json({ board: await getSkillBoard(profileId), strandMeta: STRAND_META });
+  const requestedGradeBand = req.nextUrl.searchParams.get("gradeBand") as GradeBand | null;
+  const gradeBand: GradeBand =
+    requestedGradeBand && GRADE_BAND_META[requestedGradeBand] ? requestedGradeBand : defaultGradeBandForAge(profile.age);
+
+  return NextResponse.json({
+    board: await getSkillBoard(profileId, gradeBand),
+    strandMeta: STRAND_META,
+    gradeBand,
+    gradeBandMeta: GRADE_BAND_META,
+  });
 }

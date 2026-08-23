@@ -53,6 +53,25 @@ import { craftTextStructure } from "./reading/craftTextStructure";
 import { factOpinion } from "./reading/factOpinion";
 import { factTextEvidence } from "./reading/factTextEvidence";
 import { factGenre } from "./reading/factGenre";
+import { countingTo20 } from "./grade1/countingTo20";
+import { countingTo120 } from "./grade1/countingTo120";
+import { skipCounting } from "./grade1/skipCounting";
+import { beforeAfterBetween } from "./grade1/beforeAfterBetween";
+import { comparingNumbers } from "./grade1/comparingNumbers";
+import { addWithin10 } from "./grade1/addWithin10";
+import { addWithin20 } from "./grade1/addWithin20";
+import { subtractWithin20 } from "./grade1/subtractWithin20";
+import { additionWordProblems } from "./grade1/additionWordProblems";
+import { missingAddend } from "./grade1/missingAddend";
+import { tensAndOnes } from "./grade1/tensAndOnes";
+import { placeValueCompare } from "./grade1/placeValueCompare";
+import { addSubtractTens } from "./grade1/addSubtractTens";
+import { identify2dShapes } from "./grade1/identify2dShapes";
+import { identify3dShapes } from "./grade1/identify3dShapes";
+import { partitionShapes } from "./grade1/partitionShapes";
+import { compareLength } from "./grade1/compareLength";
+import { tellTimeHour } from "./grade1/tellTimeHour";
+import { readTallyCharts } from "./grade1/readTallyCharts";
 
 const GENERATORS: Record<string, ProblemGenerator> = {
   "mult-2digit-1digit": mult2x1,
@@ -109,6 +128,25 @@ const GENERATORS: Record<string, ProblemGenerator> = {
   "fact-opinion": factOpinion,
   "fact-text-evidence": factTextEvidence,
   "fact-genre": factGenre,
+  "g1-counting-to-20": countingTo20,
+  "g1-counting-to-120": countingTo120,
+  "g1-skip-counting": skipCounting,
+  "g1-before-after-between": beforeAfterBetween,
+  "g1-comparing-numbers": comparingNumbers,
+  "g1-add-within-10": addWithin10,
+  "g1-add-within-20": addWithin20,
+  "g1-subtract-within-20": subtractWithin20,
+  "g1-addition-word-problems": additionWordProblems,
+  "g1-missing-addend": missingAddend,
+  "g1-tens-and-ones": tensAndOnes,
+  "g1-place-value-compare": placeValueCompare,
+  "g1-add-subtract-tens": addSubtractTens,
+  "g1-identify-2d-shapes": identify2dShapes,
+  "g1-identify-3d-shapes": identify3dShapes,
+  "g1-partition-shapes": partitionShapes,
+  "g1-compare-length": compareLength,
+  "g1-tell-time-hour": tellTimeHour,
+  "g1-read-tally-charts": readTallyCharts,
 };
 
 export function getGenerator(generatorId: string): ProblemGenerator {

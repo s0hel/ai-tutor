@@ -4,6 +4,7 @@ export const MULTIPLICATION_SKILLS: Skill[] = [
   {
     slug: "mult-2digit-1digit",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "multiplication",
     title: "Multiplying a 2-digit number by a 1-digit number",
     order: 1,
@@ -26,6 +27,7 @@ export const MULTIPLICATION_SKILLS: Skill[] = [
   {
     slug: "mult-3digit-1digit",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "multiplication",
     title: "Multiplying a 3-digit number by a 1-digit number",
     order: 2,
@@ -48,6 +50,7 @@ export const MULTIPLICATION_SKILLS: Skill[] = [
   {
     slug: "mult-2digit-2digit",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "multiplication",
     title: "Multiplying two 2-digit numbers",
     order: 3,
@@ -70,6 +73,7 @@ export const MULTIPLICATION_SKILLS: Skill[] = [
   {
     slug: "mult-multidigit",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "multiplication",
     title: "Multiplying larger numbers by a 2-digit number",
     order: 4,
@@ -91,6 +95,7 @@ export const MULTIPLICATION_SKILLS: Skill[] = [
   {
     slug: "mult-by-powers-of-ten",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "multiplication",
     title: "Multiplying by 10, 100, and 1000",
     order: 5,

@@ -4,6 +4,7 @@ export const FRACTION_SKILLS: Skill[] = [
   {
     slug: "fraction-equivalent",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "fractions",
     title: "Finding equivalent fractions",
     order: 1,
@@ -23,6 +24,7 @@ export const FRACTION_SKILLS: Skill[] = [
   {
     slug: "fraction-compare",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "fractions",
     title: "Comparing fractions",
     order: 2,
@@ -41,6 +43,7 @@ export const FRACTION_SKILLS: Skill[] = [
   {
     slug: "fraction-add-like",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "fractions",
     title: "Adding fractions with the same denominator",
     order: 3,
@@ -56,6 +59,7 @@ export const FRACTION_SKILLS: Skill[] = [
   {
     slug: "fraction-add-unlike",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "fractions",
     title: "Adding fractions with different denominators",
     order: 4,
@@ -74,6 +78,7 @@ export const FRACTION_SKILLS: Skill[] = [
   {
     slug: "fraction-simplify",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "fractions",
     title: "Simplifying fractions to lowest terms",
     order: 5,
@@ -92,6 +97,7 @@ export const FRACTION_SKILLS: Skill[] = [
   {
     slug: "fraction-mixed-improper",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "fractions",
     title: "Converting between mixed numbers and improper fractions",
     order: 6,
@@ -108,6 +114,7 @@ export const FRACTION_SKILLS: Skill[] = [
   {
     slug: "fraction-multiply-whole",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "fractions",
     title: "Multiplying a fraction by a whole number",
     order: 7,

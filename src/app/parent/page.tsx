@@ -7,7 +7,7 @@ import { AVATARS, BADGES, type Attempt, type Badge, type ParentInvite, type Prof
 import type { SkillBoardEntry } from "@/components/SkillBoard";
 import type { GTBoardEntry } from "@/components/GTBoard";
 import type { ReadingBoardEntry } from "@/components/ReadingBoard";
-import type { Strand } from "@/lib/skills";
+import { GRADE_BAND_META, type Strand } from "@/lib/skills";
 import type { Battery } from "@/lib/gifted";
 import type { ReadingStrand } from "@/lib/reading";
 
@@ -221,8 +221,8 @@ function ProfileStats({ profile }: { profile: Profile }) {
   };
 
   const mathBoardCard = () => {
-    const strands = Array.from(new Set(stats.math.board.map((e) => e.skill.strand))).sort(
-      (a, b) => stats.strandMeta[a].order - stats.strandMeta[b].order
+    const gradeBands = Array.from(new Set(stats.math.board.map((e) => e.skill.gradeBand))).sort(
+      (a, b) => GRADE_BAND_META[a].order - GRADE_BAND_META[b].order
     );
     return (
       <div className="rounded-2xl bg-white p-4 shadow-sm">
@@ -231,23 +231,36 @@ function ProfileStats({ profile }: { profile: Profile }) {
           {stats.math.total} questions answered
           {stats.math.accuracy !== null && ` · ${stats.math.accuracy}% correct`}
         </p>
-        <ul className="mt-2 space-y-1.5 text-sm">
-          {strands.map((strand) => {
-            const entries = stats.math.board.filter((e) => e.skill.strand === strand);
-            const mastered = entries.filter((e) => e.status === "mastered").length;
-            const practicing = entries.filter((e) => e.status === "practicing").length;
-            return (
-              <li key={strand} className="flex justify-between text-kip-ink/70">
-                <span>
-                  {stats.strandMeta[strand].emoji} {stats.strandMeta[strand].label}
-                </span>
-                <span>
-                  {mastered}/{entries.length} mastered{practicing > 0 && ` · ${practicing} practicing`}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+        {gradeBands.map((band) => {
+          const bandEntries = stats.math.board.filter((e) => e.skill.gradeBand === band);
+          const strands = Array.from(new Set(bandEntries.map((e) => e.skill.strand))).sort(
+            (a, b) => stats.strandMeta[a].order - stats.strandMeta[b].order
+          );
+          return (
+            <div key={band} className="mt-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-kip-ink/40">
+                {GRADE_BAND_META[band].label}
+              </p>
+              <ul className="mt-1 space-y-1.5 text-sm">
+                {strands.map((strand) => {
+                  const entries = bandEntries.filter((e) => e.skill.strand === strand);
+                  const mastered = entries.filter((e) => e.status === "mastered").length;
+                  const practicing = entries.filter((e) => e.status === "practicing").length;
+                  return (
+                    <li key={strand} className="flex justify-between text-kip-ink/70">
+                      <span>
+                        {stats.strandMeta[strand].emoji} {stats.strandMeta[strand].label}
+                      </span>
+                      <span>
+                        {mastered}/{entries.length} mastered{practicing > 0 && ` · ${practicing} practicing`}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })}
       </div>
     );
   };

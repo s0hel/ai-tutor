@@ -4,6 +4,7 @@ export const DECIMAL_SKILLS: Skill[] = [
   {
     slug: "decimal-place-value",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "decimals",
     title: "Decimal place value",
     order: 1,
@@ -20,6 +21,7 @@ export const DECIMAL_SKILLS: Skill[] = [
   {
     slug: "decimal-compare",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "decimals",
     title: "Comparing decimals",
     order: 2,
@@ -38,6 +40,7 @@ export const DECIMAL_SKILLS: Skill[] = [
   {
     slug: "decimal-add-subtract",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "decimals",
     title: "Adding and subtracting decimals",
     order: 3,
@@ -53,6 +56,7 @@ export const DECIMAL_SKILLS: Skill[] = [
   {
     slug: "decimal-fraction-convert",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "decimals",
     title: "Converting fractions to decimals",
     order: 4,
@@ -68,6 +72,7 @@ export const DECIMAL_SKILLS: Skill[] = [
   {
     slug: "decimal-round",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "decimals",
     title: "Rounding decimals",
     order: 5,
@@ -82,6 +87,7 @@ export const DECIMAL_SKILLS: Skill[] = [
   {
     slug: "decimal-multiply-power-of-ten",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "decimals",
     title: "Multiplying decimals by 10 and 100",
     order: 6,

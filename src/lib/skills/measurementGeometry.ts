@@ -4,6 +4,7 @@ export const MEASUREMENT_GEOMETRY_SKILLS: Skill[] = [
   {
     slug: "geo-area-rectangle",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "measurement-geometry",
     title: "Area of a rectangle",
     order: 1,
@@ -19,6 +20,7 @@ export const MEASUREMENT_GEOMETRY_SKILLS: Skill[] = [
   {
     slug: "geo-perimeter-rectangle",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "measurement-geometry",
     title: "Perimeter of a rectangle",
     order: 2,
@@ -35,6 +37,7 @@ export const MEASUREMENT_GEOMETRY_SKILLS: Skill[] = [
   {
     slug: "geo-classify-shape",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "measurement-geometry",
     title: "Classifying shapes by number of sides",
     order: 3,
@@ -53,6 +56,7 @@ export const MEASUREMENT_GEOMETRY_SKILLS: Skill[] = [
   {
     slug: "geo-classify-angle",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "measurement-geometry",
     title: "Classifying angles",
     order: 4,
@@ -69,6 +73,7 @@ export const MEASUREMENT_GEOMETRY_SKILLS: Skill[] = [
   {
     slug: "geo-unit-conversion",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "measurement-geometry",
     title: "Converting between units of measurement",
     order: 5,

@@ -1,4 +1,4 @@
-import { SKILLS, type Skill } from "./skills";
+import { SKILLS, type GradeBand, type Skill } from "./skills";
 import { listSkillStates } from "./repo";
 import type { SkillStatus } from "./types";
 
@@ -9,11 +9,13 @@ export interface SkillBoardEntry {
   recommended: boolean;
 }
 
-export async function getSkillBoard(profileId: number): Promise<SkillBoardEntry[]> {
+/** Pass a gradeBand to scope the board (and its "recommended next" pick) to just that grade's skills — omit it for a full, ungrouped overview (used by the parent dashboard). */
+export async function getSkillBoard(profileId: number, gradeBand?: GradeBand): Promise<SkillBoardEntry[]> {
   const states = await listSkillStates(profileId, "math");
   const stateByTopic = new Map(states.map((s) => [s.topic, s]));
+  const skillsInScope = gradeBand ? SKILLS.filter((s) => s.gradeBand === gradeBand) : SKILLS;
 
-  const entries: SkillBoardEntry[] = SKILLS.map((skill) => {
+  const entries: SkillBoardEntry[] = skillsInScope.map((skill) => {
     const state = stateByTopic.get(skill.slug);
     return {
       skill,

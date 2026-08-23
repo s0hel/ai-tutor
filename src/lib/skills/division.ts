@@ -4,6 +4,7 @@ export const DIVISION_SKILLS: Skill[] = [
   {
     slug: "div-1digit-divisor",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "division",
     title: "Dividing by a 1-digit number",
     order: 1,
@@ -23,6 +24,7 @@ export const DIVISION_SKILLS: Skill[] = [
   {
     slug: "div-1digit-remainder",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "division",
     title: "Dividing with a remainder",
     order: 2,
@@ -42,6 +44,7 @@ export const DIVISION_SKILLS: Skill[] = [
   {
     slug: "div-2digit-divisor",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "division",
     title: "Dividing by a 2-digit number",
     order: 3,
@@ -60,6 +63,7 @@ export const DIVISION_SKILLS: Skill[] = [
   {
     slug: "div-remainder-interpretation",
     subject: "math",
+    gradeBand: "grade4-5",
     strand: "division",
     title: "Interpreting remainders in word problems",
     order: 4,

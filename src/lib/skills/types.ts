@@ -2,11 +2,26 @@ import type { ConceptBrief } from "../types";
 
 export type { ConceptBrief };
 
-export type Strand = "multiplication" | "division" | "fractions" | "decimals" | "measurement-geometry";
+export type GradeBand = "grade1" | "grade4-5";
+
+export type Strand =
+  // grade4-5
+  | "multiplication"
+  | "division"
+  | "fractions"
+  | "decimals"
+  | "measurement-geometry"
+  // grade1
+  | "counting-number-sense"
+  | "addition-subtraction"
+  | "place-value"
+  | "shapes-geometry"
+  | "measurement-data";
 
 export interface Skill {
   slug: string;
   subject: "math";
+  gradeBand: GradeBand;
   strand: Strand;
   title: string;
   order: number;
