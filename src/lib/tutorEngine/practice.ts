@@ -1,7 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import type { ActivityType, Profile, TutorableSkill } from "../types";
 import type { AnswerType, GeneratedProblem } from "../problemGenerators/types";
-import type { GTProblemData } from "../gifted/visualTypes";
 import { getClient, HAIKU_MODEL } from "./client";
 import { subjectSkillLabel } from "./subjectLabel";
 
@@ -54,7 +53,7 @@ function answerFormatGuidance(answerType: AnswerType): string {
     case "text":
       return "The kid should answer with a short word or phrase.";
     case "choice":
-      return "The kid answers by tapping one of several picture options shown on screen — do not ask them to type or say a value, and don't try to describe the pictures yourself, they're already visible.";
+      return "The kid answers by tapping one of several options shown on screen — do not ask them to type or say a value, and don't try to describe or restate the options yourself, they're already visible.";
   }
 }
 
@@ -84,7 +83,7 @@ export async function presentProblem(params: {
   const { profile, skill, problem } = params;
   const problemText =
     problem.answerType === "choice"
-      ? `Fixed instruction (do not alter — just phrase it warmly, do not describe or invent any pictures): "${(problem.problemData as GTProblemData).instruction}"`
+      ? `Fixed instruction (do not alter — just phrase it warmly, do not describe or invent any options): "${(problem.problemData as { instruction: string }).instruction}"`
       : `Fixed problem data (do not alter): ${JSON.stringify(problem.problemData)}`;
   // presentSafetyPreamble is stable across problems within the same skill's practice session;
   // the problem data is fresh every call, so it stays uncached and after the breakpoint.

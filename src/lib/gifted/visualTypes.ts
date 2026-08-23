@@ -23,7 +23,9 @@ export interface ConceptSpec {
 export type ChoiceRender =
   | { kind: "shape"; shape: ShapeSpec }
   | { kind: "concept"; concept: ConceptSpec }
-  | { kind: "number"; value: number };
+  | { kind: "number"; value: number }
+  /** Plain written text — used by subjects (e.g. reading) whose answer options are words/sentences rather than pictures. */
+  | { kind: "text"; value: string };
 
 export interface ChoiceOption {
   id: string;

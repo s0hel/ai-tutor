@@ -34,6 +34,25 @@ import { numberPuzzles } from "./gifted/numberPuzzles";
 import { numberSeries } from "./gifted/numberSeries";
 import { figureMatrices } from "./gifted/figureMatrices";
 import { figureClassification } from "./gifted/figureClassification";
+import { vocabContextClues } from "./reading/vocabContextClues";
+import { vocabSynonyms } from "./reading/vocabSynonyms";
+import { vocabAntonyms } from "./reading/vocabAntonyms";
+import { vocabPrefixesSuffixes } from "./reading/vocabPrefixesSuffixes";
+import { compMainIdea } from "./reading/compMainIdea";
+import { compSupportingDetails } from "./reading/compSupportingDetails";
+import { compSequence } from "./reading/compSequence";
+import { compSummarize } from "./reading/compSummarize";
+import { infDrawConclusions } from "./reading/infDrawConclusions";
+import { infCauseEffect } from "./reading/infCauseEffect";
+import { infCompareContrast } from "./reading/infCompareContrast";
+import { infPredict } from "./reading/infPredict";
+import { craftAuthorsPurpose } from "./reading/craftAuthorsPurpose";
+import { craftPointOfView } from "./reading/craftPointOfView";
+import { craftFigurativeLanguage } from "./reading/craftFigurativeLanguage";
+import { craftTextStructure } from "./reading/craftTextStructure";
+import { factOpinion } from "./reading/factOpinion";
+import { factTextEvidence } from "./reading/factTextEvidence";
+import { factGenre } from "./reading/factGenre";
 
 const GENERATORS: Record<string, ProblemGenerator> = {
   "mult-2digit-1digit": mult2x1,
@@ -71,6 +90,25 @@ const GENERATORS: Record<string, ProblemGenerator> = {
   "gt-number-series": numberSeries,
   "gt-figure-matrices": figureMatrices,
   "gt-figure-classification": figureClassification,
+  "vocab-context-clues": vocabContextClues,
+  "vocab-synonyms": vocabSynonyms,
+  "vocab-antonyms": vocabAntonyms,
+  "vocab-prefixes-suffixes": vocabPrefixesSuffixes,
+  "comp-main-idea": compMainIdea,
+  "comp-supporting-details": compSupportingDetails,
+  "comp-sequence": compSequence,
+  "comp-summarize": compSummarize,
+  "inf-draw-conclusions": infDrawConclusions,
+  "inf-cause-effect": infCauseEffect,
+  "inf-compare-contrast": infCompareContrast,
+  "inf-predict": infPredict,
+  "craft-authors-purpose": craftAuthorsPurpose,
+  "craft-point-of-view": craftPointOfView,
+  "craft-figurative-language": craftFigurativeLanguage,
+  "craft-text-structure": craftTextStructure,
+  "fact-opinion": factOpinion,
+  "fact-text-evidence": factTextEvidence,
+  "fact-genre": factGenre,
 };
 
 export function getGenerator(generatorId: string): ProblemGenerator {

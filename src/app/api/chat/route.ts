@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { callTutor, callTeachTurn, presentProblem, presentFeedback } from "@/lib/tutorEngine";
+import { callTeachTurn, presentProblem, presentFeedback } from "@/lib/tutorEngine";
 import { evaluateBadges, nextSkillState } from "@/lib/difficulty";
 import {
   getProfileForFamily,
   getSkillState,
   logAttempt,
-  recentAttempts,
   recordSkillPracticeDay,
   upsertSkillState,
 } from "@/lib/repo";
 import { getSkill } from "@/lib/skills";
 import { getGTSkill } from "@/lib/gifted";
+import { getReadingSkill } from "@/lib/reading";
 import { describeChoiceRender } from "@/lib/gifted/describeChoice";
-import type { GTProblemData } from "@/lib/gifted/visualTypes";
+import type { ChoiceOption, VisualSpec } from "@/lib/gifted/visualTypes";
 import { getGenerator } from "@/lib/problemGenerators/registry";
 import { gradeAnswer } from "@/lib/grading";
 import { evaluateMastery } from "@/lib/mastery";
@@ -30,10 +30,10 @@ interface DeterministicSkill extends TutorableSkill {
   generatorId: string;
 }
 
-/** Extra data the client needs to render a picture-based multiple-choice question — undefined for free-text/numeric problems. */
+/** Extra data the client needs to render a choice-based multiple-choice question — undefined for free-text/numeric problems. */
 function presentedProblemFor(problem: GeneratedProblem) {
   if (problem.answerType !== "choice") return undefined;
-  const data = problem.problemData as GTProblemData;
+  const data = problem.problemData as { prompt: VisualSpec; options: ChoiceOption[] };
   return { answerType: "choice" as const, prompt: data.prompt, options: data.options };
 }
 
@@ -83,7 +83,7 @@ async function handleDeterministicSubject(params: {
     const kidAnswerDescription =
       pending.answerType === "choice" && pending.correctAnswer.type === "choice"
         ? (() => {
-            const data = pending.problemData as GTProblemData;
+            const data = pending.problemData as { options: ChoiceOption[] };
             const selected = data.options.find((o) => o.id === lastMessage.text.trim());
             return selected ? describeChoiceRender(selected.render) : lastMessage.text;
           })()
@@ -212,59 +212,17 @@ export async function POST(req: NextRequest) {
     }
   }
   const lastMessage = history[history.length - 1];
-  const isKidAnswering = lastMessage?.role === "kid" && !!priorTurnMessage;
+
+  const SKILL_FN: Record<Subject, (slug: string) => DeterministicSkill | undefined> = {
+    math: getSkill,
+    reading: getReadingSkill,
+    gifted: getGTSkill,
+  };
 
   try {
-    if (subject === "reading") {
-      const topic = priorTurnMessage?.turn?.topic ?? "getting-started";
-      const state = await getSkillState(profileId, "reading", topic);
-      const recent = await recentAttempts(profileId, "reading", 8);
-
-      const turn = await callTutor(profile, "reading", history, state, recent);
-
-      const badgesEarned: { key: string; label: string }[] = [];
-
-      if (isKidAnswering && priorTurnMessage?.turn) {
-        await logAttempt({
-          profileId,
-          subject: "reading",
-          topic,
-          prompt: priorTurnMessage.turn.displayText,
-          kidResponse: lastMessage.text,
-          correct: turn.isCorrectAnswer === null ? null : turn.isCorrectAnswer ? 1 : 0,
-        });
-
-        const updated = nextSkillState(state, turn.isCorrectAnswer);
-        const leveledUp = Math.floor(updated.level) > Math.floor(state.level);
-        await upsertSkillState(updated);
-        badgesEarned.push(...(await evaluateBadges(profileId, "reading", updated, leveledUp)));
-      }
-
-      if (turn.topic !== topic) {
-        await upsertSkillState(await getSkillState(profileId, "reading", turn.topic));
-      }
-
-      return NextResponse.json({ turns: [turn], phase: "freeform", badgesEarned });
-    }
-
-    if (subject === "gifted") {
-      return await handleDeterministicSubject({
-        subject,
-        getSkillFn: getGTSkill,
-        profile,
-        profileId,
-        skillSlug,
-        startPractice,
-        history,
-        priorTurnMessage,
-        lastMessage,
-      });
-    }
-
-    // subject === "math": fixed skill, teach-then-practice, deterministic grading
     return await handleDeterministicSubject({
       subject,
-      getSkillFn: getSkill,
+      getSkillFn: SKILL_FN[subject],
       profile,
       profileId,
       skillSlug,

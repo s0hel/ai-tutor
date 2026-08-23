@@ -6,8 +6,10 @@ import AvatarIcon from "@/components/AvatarIcon";
 import { AVATARS, BADGES, type Attempt, type Badge, type ParentInvite, type Profile, type SkillState } from "@/lib/types";
 import type { SkillBoardEntry } from "@/components/SkillBoard";
 import type { GTBoardEntry } from "@/components/GTBoard";
+import type { ReadingBoardEntry } from "@/components/ReadingBoard";
 import type { Strand } from "@/lib/skills";
 import type { Battery } from "@/lib/gifted";
+import type { ReadingStrand } from "@/lib/reading";
 
 interface StatsResponse {
   profile: Profile;
@@ -20,7 +22,13 @@ interface StatsResponse {
     topics: SkillState[];
     board: SkillBoardEntry[];
   };
-  reading: { total: number; correct: number; accuracy: number | null; topics: SkillState[] };
+  reading: {
+    total: number;
+    correct: number;
+    accuracy: number | null;
+    topics: SkillState[];
+    board: ReadingBoardEntry[];
+  };
   gifted: {
     total: number;
     correct: number;
@@ -30,6 +38,7 @@ interface StatsResponse {
   };
   recentAttempts: Attempt[];
   strandMeta: Record<Strand, { label: string; emoji: string; order: number }>;
+  readingStrandMeta: Record<ReadingStrand, { label: string; emoji: string; order: number }>;
   batteryMeta: Record<Battery, { label: string; emoji: string; order: number }>;
 }
 
@@ -179,24 +188,37 @@ function ProfileStats({ profile }: { profile: Profile }) {
 
   if (!stats) return <p className="mt-4 text-sm text-kip-ink/50">Loading...</p>;
 
-  const subjectCard = (label: string, data: StatsResponse["reading"]) => (
-    <div className="rounded-2xl bg-white p-4 shadow-sm">
-      <h4 className="font-display font-semibold text-kip-ink">{label}</h4>
-      <p className="mt-1 text-sm text-kip-ink/60">
-        {data.total} questions answered
-        {data.accuracy !== null && ` · ${data.accuracy}% correct`}
-      </p>
-      <ul className="mt-2 space-y-1 text-sm">
-        {data.topics.map((t) => (
-          <li key={t.topic} className="flex justify-between text-kip-ink/70">
-            <span>{t.topic}</span>
-            <span>Lvl {t.level.toFixed(1)}</span>
-          </li>
-        ))}
-        {data.topics.length === 0 && <li className="text-kip-ink/40">No topics practiced yet</li>}
-      </ul>
-    </div>
-  );
+  const readingBoardCard = () => {
+    const strands = Array.from(new Set(stats.reading.board.map((e) => e.skill.strand))).sort(
+      (a, b) => stats.readingStrandMeta[a].order - stats.readingStrandMeta[b].order
+    );
+    return (
+      <div className="rounded-2xl bg-white p-4 shadow-sm">
+        <h4 className="font-display font-semibold text-kip-ink">📚 Reading</h4>
+        <p className="mt-1 text-sm text-kip-ink/60">
+          {stats.reading.total} questions answered
+          {stats.reading.accuracy !== null && ` · ${stats.reading.accuracy}% correct`}
+        </p>
+        <ul className="mt-2 space-y-1.5 text-sm">
+          {strands.map((strand) => {
+            const entries = stats.reading.board.filter((e) => e.skill.strand === strand);
+            const mastered = entries.filter((e) => e.status === "mastered").length;
+            const practicing = entries.filter((e) => e.status === "practicing").length;
+            return (
+              <li key={strand} className="flex justify-between text-kip-ink/70">
+                <span>
+                  {stats.readingStrandMeta[strand].emoji} {stats.readingStrandMeta[strand].label}
+                </span>
+                <span>
+                  {mastered}/{entries.length} mastered{practicing > 0 && ` · ${practicing} practicing`}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  };
 
   const mathBoardCard = () => {
     const strands = Array.from(new Set(stats.math.board.map((e) => e.skill.strand))).sort(
@@ -277,7 +299,7 @@ function ProfileStats({ profile }: { profile: Profile }) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         {mathBoardCard()}
-        {subjectCard("📚 Reading", stats.reading)}
+        {readingBoardCard()}
         {giftedBoardCard()}
       </div>
 

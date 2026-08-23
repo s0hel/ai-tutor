@@ -11,6 +11,8 @@ import { getSkillBoard } from "@/lib/skillBoard";
 import { STRAND_META } from "@/lib/skills";
 import { getGTBoard } from "@/lib/gifted/gtBoard";
 import { BATTERY_META } from "@/lib/gifted";
+import { getReadingBoard } from "@/lib/reading/readingBoard";
+import { READING_STRAND_META } from "@/lib/reading";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -42,10 +44,11 @@ export async function GET(req: NextRequest) {
     dailyStreak,
     badges,
     math: { ...bySubject("math"), board: await getSkillBoard(profileId) },
-    reading: bySubject("reading"),
+    reading: { ...bySubject("reading"), board: await getReadingBoard(profileId) },
     gifted: { ...bySubject("gifted"), board: await getGTBoard(profileId) },
     recentAttempts: attempts.slice(0, 30),
     strandMeta: STRAND_META,
+    readingStrandMeta: READING_STRAND_META,
     batteryMeta: BATTERY_META,
   });
 }

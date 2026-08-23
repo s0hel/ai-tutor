@@ -92,7 +92,7 @@ export default function HomePage() {
                   🔢 Math
                 </Link>
                 <Link
-                  href={`/learn/reading?profile=${active.id}`}
+                  href={`/learn/reading-board?profile=${active.id}`}
                   className="rounded-2xl bg-kip-pink px-6 py-4 font-display text-xl font-semibold text-white shadow-md transition hover:brightness-105"
                 >
                   📚 Reading

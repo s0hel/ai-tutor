@@ -17,6 +17,8 @@ function RenderTile({ render }: { render: ChoiceRender | null }) {
       return <ConceptIcon conceptId={render.concept.conceptId} />;
     case "number":
       return <span className="font-display text-3xl font-bold text-kip-ink">{render.value}</span>;
+    case "text":
+      return <span className="text-sm font-medium text-kip-ink">{render.value}</span>;
   }
 }
 

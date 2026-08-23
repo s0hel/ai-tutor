@@ -19,17 +19,19 @@ import type { ChoiceOption, VisualSpec } from "@/lib/gifted/visualTypes";
 
 const SUBJECT_META: Record<Subject, { title: string; color: string; emoji: string }> = {
   math: { title: "Math Time", color: "bg-kip-teal", emoji: "🔢" },
-  reading: { title: "Reading Time", color: "bg-kip-pink", emoji: "📚" },
+  reading: { title: "Reading Skills", color: "bg-kip-pink", emoji: "📚" },
   gifted: { title: "Brain Games", color: "bg-kip-orange", emoji: "🧠" },
 };
 
-/** math and gifted both follow the fixed-skill teach→practice pattern (skillSlug required, board redirect, level/streak). Reading is freeform. */
+/** All subjects (math, reading, gifted) follow the fixed-skill teach→practice pattern: skillSlug required, board redirect, level/streak. */
 function isSkillSubject(subject: Subject): boolean {
-  return subject === "math" || subject === "gifted";
+  return !!subject;
 }
 
 function boardPathFor(subject: Subject): string {
-  return subject === "gifted" ? "/learn/gt-board" : "/learn/board";
+  if (subject === "gifted") return "/learn/gt-board";
+  if (subject === "reading") return "/learn/reading-board";
+  return "/learn/board";
 }
 
 interface PresentedProblem {
@@ -88,7 +90,7 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
   const [confettiKey, setConfettiKey] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [mood, setMood] = useState<MascotMood>("idle");
-  const [phase, setPhase] = useState<"teach" | "practice" | "freeform">("freeform");
+  const [phase, setPhase] = useState<"teach" | "practice">("teach");
   const [presentedProblem, setPresentedProblem] = useState<PresentedProblem | null>(null);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [selectedCorrect, setSelectedCorrect] = useState<boolean | null>(null);
@@ -143,6 +145,14 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
             );
           }
         );
+    } else if (subject === "reading") {
+      fetch("/api/reading-skills")
+        .then((r) => r.json())
+        .then((data: { strands: { skills: { slug: string; title: string }[] }[] }) => {
+          const found = data.strands.flatMap((s) => s.skills).find((s) => s.slug === skillSlug);
+          setSkillTitle(found?.title ?? null);
+          setSkillVideo(null);
+        });
     } else {
       fetch("/api/gt-skills")
         .then((r) => r.json())
@@ -176,7 +186,7 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
       }
       const data: {
         turns: TutorTurn[];
-        phase: "teach" | "practice" | "freeform";
+        phase: "teach" | "practice";
         badgesEarned: { key: string; label: string }[];
         masteredSkill?: string | null;
         presentedProblem?: PresentedProblem;

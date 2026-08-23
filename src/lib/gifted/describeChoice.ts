@@ -8,6 +8,8 @@ export function describeChoiceRender(render: ChoiceRender): string {
       return getConcept(render.concept.conceptId).label;
     case "number":
       return String(render.value);
+    case "text":
+      return render.value;
     case "shape": {
       const s = render.shape;
       const parts = [s.fill !== "solid" ? s.fill : "", s.color, s.shape].filter(Boolean);

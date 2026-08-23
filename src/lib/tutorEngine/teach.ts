@@ -1,8 +1,49 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import type { ChatMessage, Profile, TutorableSkill, TutorTurn } from "../types";
 import { getClient, MODEL } from "./client";
-import { TUTOR_TOOL } from "./reading";
 import { subjectSkillLabel } from "./subjectLabel";
+
+const TUTOR_TOOL: Anthropic.Tool = {
+  name: "tutor_turn",
+  description:
+    "Deliver the tutor's next turn to the kid. Always call this tool exactly once per turn instead of replying in plain text.",
+  input_schema: {
+    type: "object",
+    properties: {
+      spokenText: {
+        type: "string",
+        description:
+          "What the tutor says out loud (text-to-speech). Warm, short, upbeat, easy for a young kid to follow when read aloud. 1-3 sentences.",
+      },
+      displayText: {
+        type: "string",
+        description:
+          "What appears on screen. Usually the same as spokenText, but may include the actual math expression, word, or short passage formatted clearly (e.g. using line breaks) since that's easier to read than hear.",
+      },
+      activityType: {
+        type: "string",
+        enum: ["question", "hint", "feedback", "story", "celebration"],
+        description:
+          "question: posing a new problem. hint: nudging toward an answer without giving it away. feedback: responding to the kid's last answer. story: a short reading passage. celebration: extra praise for a streak/milestone.",
+      },
+      topic: {
+        type: "string",
+        description:
+          "Short slug for the specific skill being practiced right now, e.g. 'addition-within-20', 'short-vowel-sounds', 'main-idea'. Keep it stable while practicing the same skill.",
+      },
+      difficulty: {
+        type: "number",
+        description: "Your assessment of the appropriate difficulty level for this topic, 1-10.",
+      },
+      isCorrectAnswer: {
+        type: ["boolean", "null"],
+        description:
+          "If this turn is evaluating the kid's previous answer: true if correct, false if incorrect. Null if this turn isn't evaluating an answer (e.g. it's a fresh question or a story).",
+      },
+    },
+    required: ["spokenText", "displayText", "activityType", "topic", "difficulty", "isCorrectAnswer"],
+  },
+};
 
 function teachSafetyPreamble(profile: Profile, skill: TutorableSkill): string {
   return `You are Kip, a warm, patient, endlessly encouraging AI tutor for ${profile.name}, who is ${profile.age} years old. Right now you are teaching the ${subjectSkillLabel(skill.subject)} "${skill.title}" before any practice questions begin.
