@@ -16,7 +16,7 @@ export default function KhanVideo({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="mx-4 mt-3 rounded-2xl border-2 border-kip-purple/10 bg-white px-4 py-3">
+    <div className="rounded-2xl border-2 border-kip-purple/10 bg-white px-4 py-3">
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between gap-2 text-left font-display text-sm font-semibold text-kip-purple"

@@ -313,16 +313,15 @@ function LearnPageInner({ params }: { params: Promise<{ subject: string }> }) {
         </div>
       </header>
 
-      {subject === "math" && phase === "teach" && skillVideo && (
-        <KhanVideo
-          videoId={skillVideo.videoId}
-          title={skillVideo.title}
-          source={skillVideo.source}
-          sourceUrl={skillVideo.sourceUrl}
-        />
-      )}
-
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-6">
+        {subject === "math" && phase === "teach" && skillVideo && (
+          <KhanVideo
+            videoId={skillVideo.videoId}
+            title={skillVideo.title}
+            source={skillVideo.source}
+            sourceUrl={skillVideo.sourceUrl}
+          />
+        )}
         {messages.map((m, i) => (
           <ChatBubble key={i} message={m} avatarKey={profile.avatarKey} />
         ))}
