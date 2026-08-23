@@ -42,6 +42,21 @@ const FEEDBACK_TOOL: Anthropic.Tool = {
   },
 };
 
+const OP_GUIDANCE: Record<string, string> = {
+  add: "ADDITION (+) — the story must clearly involve combining/putting together amounts. Do not phrase it as removing, splitting, or repeating groups.",
+  subtract: "SUBTRACTION (−) — the story must clearly involve taking away or finding a difference. Do not phrase it as combining, splitting into groups, or repeating.",
+  multiply: "MULTIPLICATION (×) — the story must clearly involve repeated groups, arrays, or 'each ... how many in total' framing. Do NOT phrase it as gaining/buying more of something (e.g. 'buys 28 more') or losing some — that reads as addition or subtraction, not multiplication.",
+  divide: "DIVISION (÷) — the story must clearly involve splitting a total into equal groups or finding how many groups fit. Do not phrase it as combining or repeating groups.",
+};
+
+function operationGuidance(problemData: Record<string, unknown>): string {
+  const { a, b, op } = problemData as { a?: unknown; b?: unknown; op?: unknown };
+  if (typeof a !== "number" || typeof b !== "number" || typeof op !== "string") return "";
+  const guidance = OP_GUIDANCE[op];
+  if (!guidance) return "";
+  return `\n\nThe operation for this problem is ${guidance} (${a} and ${b} are the two numbers). The word-problem story you invent MUST clearly imply this exact operation and no other — this is the single most important rule to follow.`;
+}
+
 function answerFormatGuidance(answerType: AnswerType): string {
   switch (answerType) {
     case "integer":
@@ -84,7 +99,7 @@ export async function presentProblem(params: {
   const problemText =
     problem.answerType === "choice"
       ? `Fixed instruction (do not alter — just phrase it warmly, do not describe or invent any options): "${(problem.problemData as { instruction: string }).instruction}"`
-      : `Fixed problem data (do not alter): ${JSON.stringify(problem.problemData)}`;
+      : `Fixed problem data (do not alter): ${JSON.stringify(problem.problemData)}${operationGuidance(problem.problemData)}`;
   // presentSafetyPreamble is stable across problems within the same skill's practice session;
   // the problem data is fresh every call, so it stays uncached and after the breakpoint.
   const system: Anthropic.TextBlockParam[] = [
